@@ -15,7 +15,7 @@ declare class World {
 
 	public get<T extends Array<Component<unknown>>>(id: number, ...dynamic_bundle: T): LuaTuple<Iterate<T>>;
 
-	public query<T extends Array<Component<unknown>>>(...dynamic_bundle: T): Iterate<T>;
+	public query<T extends Array<Component<unknown>>>(...dynamic_bundle: T): QueryResult<T>;
 }
 
 type ComponentBundle = Array<Component<unknown>>;
@@ -31,7 +31,12 @@ type Iterate<A extends ComponentBundle> = A extends []
 	: never;
 
 type Data<T extends { internal: unknown }> = T["internal"];
+type FilterOut<T extends Array<unknown>, F> = T extends [infer L, ...infer R]
+	? [L] extends [F]
+		? [...FilterOut<R, F>]
+		: [L, ...FilterOut<R, F>]
+	: [];
 
-interface QueryResult<T extends ComponentBundle> {
-	(): Iterator<T>;
+interface QueryResult<T extends ComponentBundle> extends IterableIterator<[number, ...Iterate<T>]> {
+	without: <e extends Array<T[number]>>(...components: e) => QueryResult<FilterOut<T, e[number]>>;
 }
