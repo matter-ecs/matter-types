@@ -4,17 +4,17 @@ import { component, Loop, World } from "@rbxts/matter"
 
 const world = new World()
 
-const Amount = component<number>()
-const Name = component<string>()
-const WantsMoney = component<boolean>()
+const Amount = component<{ amount: number }>()
+const Name = component<{ name: string} >()
+const WantsMoney = component<{ flag: boolean }>()
 
-const Marcus = world.spawn(Amount(1000), Name("Marcus"), WantsMoney(true))
-const Jade = world.spawn(Amount(7400), Name("Jade"), WantsMoney(false))
+const Marcus = world.spawn(Amount({ amount: 1000 }), Name({ name: "Marcus"}), WantsMoney({flag: true}))
+const Jade = world.spawn(Amount({ amount: 1000 }), Name({name: "Jade"}), WantsMoney({ flag: false }))
 
 for (const [entity_id, amount, name, flag] of world.query(Amount, Name, WantsMoney)) {
-  if (WantsMoney) Amount += 500
+  if (WantsMoney.flag) Amount.amount += 500
 }
 
-assert(world.get(Marcus, Amount) === 1500)
-assert(world.get(Jade, Amount) === 7400)
+assert(world.get(Marcus, Amount).amount === 1500)
+assert(world.get(Jade, Amount).amount === 7400)
 ```
