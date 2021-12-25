@@ -1,4 +1,4 @@
-export type AnyComponent = Component<unknown>;
+export type AnyComponent = Component<{ [index: string]: unknown }>;
 
 export type ComponentBundle = Array<AnyComponent>;
 
@@ -11,7 +11,7 @@ type PatchOverride<Base, Overrides> = Id<{
 		: "never";
 }>;
 
-export class Component<T> {
+export class Component<T extends { [index: string]: unknown }> {
 	/*@internal */
 	public internal: T;
 
@@ -20,6 +20,8 @@ export class Component<T> {
 	public patch<U>(data: U): Component<PatchOverride<T, U>>;
 }
 
-export function newComponent<T>(name?: string): {
+export function newComponent<T extends { [index: string]: unknown }>(
+	name?: string,
+): {
 	(): Component<T>;
 };

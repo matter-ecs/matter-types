@@ -23,7 +23,7 @@ export class World {
 type Iterate<A extends ComponentBundle> = A extends []
 	? A
 	: A extends [infer F, ...infer B]
-	? F extends Component<unknown>
+	? F extends AnyComponent
 		? B extends ComponentBundle
 			? [Data<F>, ...Iterate<B>]
 			: never
@@ -35,7 +35,7 @@ type DynamicBundle = Array<() => AnyComponent>;
 type InferComponent<A extends DynamicBundle> = A extends []
 	? A
 	: A extends [infer F, ...infer B]
-	? F extends () => Component<unknown>
+	? F extends () => AnyComponent
 		? B extends DynamicBundle
 			? [ReturnType<F>, ...InferComponent<B>]
 			: never
