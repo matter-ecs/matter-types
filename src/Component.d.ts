@@ -1,4 +1,4 @@
-declare class Component<T> {
+export class Component<T> {
 	/*@internal */
 	public internal: T;
 

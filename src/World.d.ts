@@ -1,6 +1,6 @@
-import { Iterator } from "typescript";
+import { Component } from "Component";
 
-declare class World {
+export class World {
 	public constructor();
 
 	public spawn(...dynamic_bundle: Array<unknown>): number;

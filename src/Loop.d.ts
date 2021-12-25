@@ -2,7 +2,7 @@ type System = (
 	...args: Array<never>
 ) => void | { system: (...args: Array<never>) => void; event?: string; priority: number; after: undefined | {} };
 
-declare class Loop {
+export class Loop {
 	public constructor(...dynamic_bundle: Array<never>);
 
 	public scheduleSystems(systems: Array<System>): void;
