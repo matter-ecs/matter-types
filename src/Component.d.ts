@@ -1,3 +1,7 @@
+export type AnyComponent = Component<unknown>;
+
+export type ComponentBundle = Array<AnyComponent>;
+
 export class Component<T> {
 	/*@internal */
 	public internal: T;
@@ -7,6 +11,6 @@ export class Component<T> {
 	public patch(data: T): Component<T>;
 }
 
-declare function newComponent(name: string): {
-	<T>(data: T): Component<T>;
+export function newComponent<T>(name?: string): {
+	(): Component<T>;
 };

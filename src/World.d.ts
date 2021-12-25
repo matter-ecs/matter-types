@@ -1,4 +1,4 @@
-import { Component } from "Component";
+import { AnyComponent, Component, ComponentBundle } from "Component";
 
 export class World {
 	public constructor();
@@ -13,12 +13,12 @@ export class World {
 
 	public contains(id: number): boolean;
 
-	public get<T extends Array<Component<unknown>>>(id: number, ...dynamic_bundle: T): LuaTuple<Iterate<T>>;
+	public get<T extends Array<AnyComponent>>(id: number, ...dynamic_bundle: T): LuaTuple<Iterate<T>>;
 
-	public query<T extends Array<Component<unknown>>>(...dynamic_bundle: T): QueryResult<T>;
+	public query<T extends DynamicBundle>(...dynamic_bundle: T): QueryResult<InferComponent<T>>;
+
+	public queryChanged<T, A extends DynamicBundle>(mt: T, ...adds: A): QueryResult2<[...InferComponent<A>]>;
 }
-
-type ComponentBundle = Array<Component<unknown>>;
 
 type Iterate<A extends ComponentBundle> = A extends []
 	? A
@@ -26,6 +26,18 @@ type Iterate<A extends ComponentBundle> = A extends []
 	? F extends Component<unknown>
 		? B extends ComponentBundle
 			? [Data<F>, ...Iterate<B>]
+			: never
+		: never
+	: never;
+
+type DynamicBundle = Array<() => AnyComponent>;
+
+type InferComponent<A extends DynamicBundle> = A extends []
+	? A
+	: A extends [infer F, ...infer B]
+	? F extends () => Component<unknown>
+		? B extends DynamicBundle
+			? [ReturnType<F>, ...InferComponent<B>]
 			: never
 		: never
 	: never;
@@ -40,3 +52,5 @@ type FilterOut<T extends Array<unknown>, F> = T extends [infer L, ...infer R]
 interface QueryResult<T extends ComponentBundle> extends IterableIterator<[number, ...Iterate<T>]> {
 	without: <e extends Array<T[number]>>(...components: e) => QueryResult<FilterOut<T, e[number]>>;
 }
+
+interface QueryResult2<T extends ComponentBundle> extends IterableIterator<[number, {}, ...Iterate<T>]> {}

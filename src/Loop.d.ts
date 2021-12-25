@@ -1,13 +1,15 @@
-type System = (
-	...args: Array<never>
-) => void | { system: (...args: Array<never>) => void; event?: string; priority: number; after: undefined | {} };
+import { World } from "World";
 
-export class Loop {
-	public constructor(...dynamic_bundle: Array<never>);
+type System<T extends Array<unknown>> = (
+	...args: T
+) => void | { system: (...args: T) => void; event?: string; priority: number; after: undefined | {} };
 
-	public scheduleSystems(systems: Array<System>): void;
+export class Loop<T extends Array<unknown>> {
+	public constructor(...dynamic_bundle: T);
 
-	public scheduleSystem(): void;
+	public scheduleSystems<S extends Array<System<T>>>(systems: S): void;
+
+	public scheduleSystem(system: System<T>): void;
 
 	public begin<T extends { [index: string]: RBXScriptConnection }>(events: T): { [P in keyof T]: RBXScriptSignal };
 
