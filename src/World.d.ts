@@ -1,11 +1,11 @@
-import { AnyComponent, Component, ComponentBundle } from "Component";
+import { AnyComponent, ComponentBundle } from "Component";
 
 export class World {
 	public constructor();
 
-	public spawn(...dynamic_bundle: Array<unknown>): number;
+	public spawn(...dynamic_bundle: Array<AnyComponent>): number;
 
-	public replace(id: number, ...dynamic_bundle: Array<unknown>): number;
+	public replace(id: number, ...dynamic_bundle: Array<AnyComponent>): number;
 
 	public despawn(id: number): void;
 
@@ -13,7 +13,9 @@ export class World {
 
 	public contains(id: number): boolean;
 
-	public get<T extends Array<AnyComponent>>(id: number, ...dynamic_bundle: T): LuaTuple<Iterate<T>>;
+	public get<C extends () => AnyComponent>(id: number, only: C): Data<ReturnType<C>>;
+
+	public get<T extends DynamicBundle>(id: number, ...dynamic_bundle: T): LuaTuple<Iterate<InferComponent<T>>>;
 
 	public query<T extends DynamicBundle>(...dynamic_bundle: T): QueryResult<InferComponent<T>>;
 

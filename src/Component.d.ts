@@ -23,5 +23,5 @@ export class Component<T extends { [index: string]: unknown }> {
 export function newComponent<T extends { [index: string]: unknown }>(
 	name?: string,
 ): {
-	(): Component<T>;
+	(data?: T): Component<T>;
 };
