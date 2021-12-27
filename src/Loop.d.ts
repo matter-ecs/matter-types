@@ -1,5 +1,3 @@
-import { World } from "World";
-
 type System<T extends Array<unknown>> = (
 	...args: T
 ) => void | { system: (...args: T) => void; event?: string; priority: number; after: undefined | {} };

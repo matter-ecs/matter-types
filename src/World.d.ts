@@ -1,4 +1,4 @@
-import { AnyComponent, ComponentBundle } from "Component";
+import { AnyComponent, ComponentBundle } from "./Component";
 
 export class World {
 	public constructor();
@@ -51,8 +51,10 @@ type FilterOut<T extends Array<unknown>, F> = T extends [infer L, ...infer R]
 		: [L, ...FilterOut<R, F>]
 	: [];
 
-interface QueryResult<T extends ComponentBundle> extends IterableIterator<[number, ...Iterate<T>]> {
+interface QueryResult<T extends ComponentBundle> extends Array<[number, ...Iterate<T>]> {
 	without: <e extends Array<T[number]>>(...components: e) => QueryResult<FilterOut<T, e[number]>>;
 }
 
-interface QueryResult2<T extends ComponentBundle> extends IterableIterator<[number, {}, ...Iterate<T>]> {}
+interface QueryResult2<T extends ComponentBundle> extends Array<[number, {}, ...Iterate<T>]> {
+	without: <e extends Array<T[number]>>(...components: e) => QueryResult<FilterOut<T, e[number]>>;
+}
