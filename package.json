@@ -11,7 +11,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "types": "out/lib/index.d.ts",
+  "types": "src/MatterLib/index.d.ts",
   "files": [
     "src/"
   ],
