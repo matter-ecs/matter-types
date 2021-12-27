@@ -17,7 +17,7 @@
 
 		// configurable
 		"rootDir": "src",
-		"outDir": "out",
+		"outDir": "init.lua",
 		"baseUrl": "src",
 		"incremental": true,
 		"declaration": true
