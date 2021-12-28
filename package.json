@@ -1,6 +1,6 @@
 {
   "name": "@rbxts/matter",
-  "version": "1.0.3",
+  "version": "1.0.4-test-fix",
   "description": "",
   "main": "out/lib/init.lua",
   "scripts": {
