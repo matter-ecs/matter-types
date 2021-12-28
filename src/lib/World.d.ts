@@ -18,8 +18,6 @@ export class World {
 	public get<T extends DynamicBundle>(id: number, ...dynamic_bundle: T): LuaTuple<Iterate<InferComponent<T>>>;
 
 	public query<T extends DynamicBundle>(...dynamic_bundle: T): QueryResult<InferComponent<T>>;
-
-	public queryChanged<T, A extends DynamicBundle>(mt: T, ...adds: A): QueryResult2<[...InferComponent<A>]>;
 }
 
 type Iterate<A extends ComponentBundle> = A extends []
@@ -51,10 +49,6 @@ type FilterOut<T extends Array<unknown>, F> = T extends [infer L, ...infer R]
 		: [L, ...FilterOut<R, F>]
 	: [];
 
-interface QueryResult<T extends ComponentBundle> extends Iterator<[number, ...Iterate<T>]> {
+type QueryResult<T extends ComponentBundle> = IterableFunction<LuaTuple<[number, ...Iterate<T>]>> & {
 	without: <e extends Array<T[number]>>(...components: e) => QueryResult<FilterOut<T, e[number]>>;
-}
-
-interface QueryResult2<T extends ComponentBundle> extends Iterator<[number, {}, ...Iterate<T>]> {
-	without: <e extends Array<T[number]>>(...components: e) => QueryResult<FilterOut<T, e[number]>>;
-}
+};
