@@ -2,7 +2,7 @@
   "name": "@rbxts/matter",
   "version": "1.0.3",
   "description": "",
-  "main": "src/lib/init.lua",
+  "main": "out/lib/init.lua",
   "scripts": {
     "build": "rbxtsc",
     "watch": "rbxtsc -w",
@@ -11,9 +11,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "types": "src/MatterLib/index.d.ts",
+  "types": "out/lib/index.d.ts",
   "files": [
-    "src/"
+    "out/"
   ],
   "publishConfig": {
     "access": "public"
