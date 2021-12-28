@@ -1,11 +1,18 @@
-import { AnyComponent, ComponentBundle, DynamicBundle, InferComponent, InferComponents } from "./Component";
+import {
+	AnyComponent,
+	ComponentBundle,
+	ComponentCtor,
+	DynamicBundle,
+	InferComponent,
+	InferComponents,
+} from "./Component";
 
 export class World {
 	public constructor();
 
-	public spawn(...dynamic_bundle: Array<AnyComponent>): number;
+	public spawn(...component_bundle: Array<AnyComponent>): number;
 
-	public replace(id: number, ...dynamic_bundle: Array<AnyComponent>): number;
+	public replace(id: number, ...component_bundle: Array<AnyComponent>): number;
 
 	public despawn(id: number): void;
 
@@ -13,11 +20,16 @@ export class World {
 
 	public contains(id: number): boolean;
 
-	public get<C extends () => AnyComponent>(id: number, only: C): InferComponent<ReturnType<C>>;
+	public get<C extends ComponentCtor>(id: number, only: C): InferComponent<ReturnType<C>>;
 
 	public get<T extends DynamicBundle>(id: number, ...dynamic_bundle: T): LuaTuple<Iterate<InferComponents<T>>>;
 
 	public query<T extends DynamicBundle>(...dynamic_bundle: T): QueryResult<InferComponents<T>>;
+
+	public queryChanged<C extends ComponentCtor, T extends DynamicBundle>(
+		mt: C,
+		...dynamic_bundle: T
+	): IterableFunction<LuaTuple<[number, { new: C; old: C }, ...Iterate<InferComponents<T>>]>>;
 }
 
 type Iterate<A extends ComponentBundle> = A extends []
@@ -31,5 +43,5 @@ type Iterate<A extends ComponentBundle> = A extends []
 	: never;
 
 type QueryResult<T extends ComponentBundle> = IterableFunction<LuaTuple<[number, ...Iterate<T>]>> & {
-	without: <e extends DynamicBundle>(...components: e) => QueryResult<T>;
+	without: (...components: DynamicBundle) => QueryResult<T>;
 };

@@ -9,7 +9,7 @@ export class Loop<T extends Array<unknown>> {
 
 	public scheduleSystem(system: System<T>): void;
 
-	public begin<T extends { [index: string]: RBXScriptConnection }>(events: T): { [P in keyof T]: RBXScriptSignal };
+	public begin<T extends { [index: string]: RBXScriptSignal }>(events: T): { [P in keyof T]: RBXScriptConnection };
 
 	public addMiddleware(fn: (nextFn: () => void) => () => void): void;
 }

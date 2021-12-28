@@ -1,4 +1,5 @@
 export type AnyComponent = Component<{ [index: string]: unknown }>;
+export type ComponentCtor = () => AnyComponent;
 
 export type ComponentBundle = Array<AnyComponent>;
 
@@ -20,12 +21,12 @@ export class Component<T extends { [index: string]: unknown }> {
 export type GenericOfComponent<T> = T extends Component<infer A> ? A : never;
 export type InferComponent<T extends AnyComponent> = T & GenericOfComponent<T>;
 
-export type DynamicBundle = Array<() => AnyComponent>;
+export type DynamicBundle = Array<ComponentCtor>;
 
 export type InferComponents<A extends DynamicBundle> = A extends []
 	? A
 	: A extends [infer F, ...infer B]
-	? F extends () => AnyComponent
+	? F extends ComponentCtor
 		? B extends DynamicBundle
 			? [ReturnType<F>, ...InferComponents<B>]
 			: never
