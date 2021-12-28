@@ -43,12 +43,7 @@ type InferComponent<A extends DynamicBundle> = A extends []
 	: never;
 
 type Data<T extends { internal: unknown }> = T["internal"];
-type FilterOut<T extends Array<unknown>, F> = T extends [infer L, ...infer R]
-	? [L] extends [F]
-		? [...FilterOut<R, F>]
-		: [L, ...FilterOut<R, F>]
-	: [];
 
 type QueryResult<T extends ComponentBundle> = IterableFunction<LuaTuple<[number, ...Iterate<T>]>> & {
-	without: <e extends Array<T[number]>>(...components: e) => QueryResult<FilterOut<T, e[number]>>;
+	without: <e extends DynamicBundle>(...components: e) => QueryResult<T>;
 };
