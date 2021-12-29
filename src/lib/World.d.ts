@@ -1,28 +1,59 @@
+import { A, L } from "ts-toolbelt";
+
 import {
 	AnyComponent,
+	Component,
 	ComponentBundle,
 	ComponentCtor,
 	DynamicBundle,
+	GenericOfComponent,
 	InferComponent,
 	InferComponents,
 } from "./Component";
 
+type Entity<T extends ComponentBundle> = number & {
+	/**
+	 * @hidden
+	 * @deprecated
+	 */
+	readonly _nominal_entity: T;
+};
+
+type AnyEntity = Entity<[]>;
+
+type IsEqual<A, B> = (<T>() => T extends A ? true : false) extends <T>() => T extends B ? true : false ? true : false;
+
+type Includes<T, V> = T extends [infer F, ...infer R] ? (IsEqual<F, V> extends true ? true : Includes<R, V>) : false;
+
+type IncludesAll<T extends L.List, S extends L.List> = A.Equals<
+	{ [P in keyof S]: L.Includes<T, S[P]> }[number],
+	1
+> extends 1
+	? true
+	: false;
+
 export class World {
 	public constructor();
 
-	public spawn(...component_bundle: Array<AnyComponent>): number;
+	public spawn<T extends ComponentBundle>(...component_bundle: T): Entity<T>;
 
-	public replace(id: number, ...component_bundle: Array<AnyComponent>): number;
+	public replace<T extends ComponentBundle>(id: AnyEntity, ...component_bundle: T): Entity<T>;
 
-	public despawn(id: number): void;
+	public despawn(id: AnyEntity): void;
 
 	public clear(): void;
 
-	public contains(id: number): boolean;
+	public contains(id: AnyEntity): boolean;
 
-	public get<C extends ComponentCtor>(id: number, only: C): InferComponent<ReturnType<C>>;
+	public get<T extends ComponentBundle, C extends ComponentCtor>(
+		id: Entity<T>,
+		only: Includes<Iterate<T>, GenericOfComponent<ReturnType<C>>> extends true ? C : never,
+	): InferComponent<ReturnType<C>>;
 
-	public get<T extends DynamicBundle>(id: number, ...dynamic_bundle: T): LuaTuple<Iterate<InferComponents<T>>>;
+	public get<C extends ComponentBundle, T extends DynamicBundle>(
+		id: Entity<C>,
+		...dynamic_bundle: IncludesAll<Iterate<C>, Iterate<InferComponents<T>>> extends true ? T : never
+	): LuaTuple<InferComponents<T>>;
 
 	public query<T extends DynamicBundle>(...dynamic_bundle: T): QueryResult<InferComponents<T>>;
 
@@ -30,6 +61,10 @@ export class World {
 		mt: C,
 		...dynamic_bundle: T
 	): IterableFunction<LuaTuple<[number, { new: C; old: C }, ...Iterate<InferComponents<T>>]>>;
+
+	public insert(id: AnyEntity, ...dynamic_bundle: DynamicBundle): void;
+
+	public remove<T extends DynamicBundle>(id: AnyEntity, ...dynamic_bundle: T): T;
 }
 
 type Iterate<A extends ComponentBundle> = A extends []
@@ -37,11 +72,17 @@ type Iterate<A extends ComponentBundle> = A extends []
 	: A extends [infer F, ...infer B]
 	? F extends AnyComponent
 		? B extends ComponentBundle
-			? [InferComponent<F>, ...Iterate<B>]
+			? [GenericOfComponent<F>, ...Iterate<B>]
 			: never
 		: never
 	: never;
 
-type QueryResult<T extends ComponentBundle> = IterableFunction<LuaTuple<[number, ...Iterate<T>]>> & {
-	without: (...components: DynamicBundle) => QueryResult<T>;
+type QueryResult<T extends ComponentBundle> = IterableFunction<LuaTuple<[Entity<T>, ...Iterate<T>]>> & {
+	without: (this: World, ...components: DynamicBundle) => QueryResult<T>;
 };
+
+export type FilterOut<T extends Array<unknown>, F> = T extends [infer L, ...infer R]
+	? [L] extends [F]
+		? [...FilterOut<R, F>]
+		: [L, ...FilterOut<R, F>]
+	: [];

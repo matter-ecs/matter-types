@@ -28,7 +28,7 @@ export type InferComponents<A extends DynamicBundle> = A extends []
 	: A extends [infer F, ...infer B]
 	? F extends ComponentCtor
 		? B extends DynamicBundle
-			? [ReturnType<F>, ...InferComponents<B>]
+			? [InferComponent<ReturnType<F>>, ...InferComponents<B>]
 			: never
 		: never
 	: never;
