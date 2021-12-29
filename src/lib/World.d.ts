@@ -19,7 +19,7 @@ type Entity<T extends ComponentBundle> = number & {
 	readonly _nominal_entity: T;
 };
 
-type AnyEntity = Entity<[]>;
+type AnyEntity = Entity<ComponentBundle>;
 
 type IsEqual<A, B> = (<T>() => T extends A ? true : false) extends <T>() => T extends B ? true : false ? true : false;
 
@@ -77,8 +77,8 @@ type Iterate<A extends ComponentBundle> = A extends []
 		: never
 	: never;
 
-type QueryResult<T extends ComponentBundle> = IterableFunction<LuaTuple<[Entity<T>, ...Iterate<T>]>> & {
-	without: (this: World, ...components: DynamicBundle) => QueryResult<T>;
+type QueryResult<T extends ComponentBundle> = IterableFunction<LuaTuple<[Entity<T>, ...T]>> & {
+	without: (this: QueryResult<T>, ...components: DynamicBundle) => IterableFunction<LuaTuple<[Entity<T>, ...T]>>;
 };
 
 export type FilterOut<T extends Array<unknown>, F> = T extends [infer L, ...infer R]
