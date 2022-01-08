@@ -7,11 +7,10 @@ import {
 	ComponentCtor,
 	DynamicBundle,
 	GenericOfComponent,
-	InferComponent,
 	InferComponents,
 } from "./Component";
 
-type Entity<T extends ComponentBundle> = number & {
+export type Entity<T extends ComponentBundle> = number & {
 	/**
 	 * @hidden
 	 * @deprecated
@@ -19,7 +18,7 @@ type Entity<T extends ComponentBundle> = number & {
 	readonly _nominal_entity: T;
 };
 
-type AnyEntity = Entity<ComponentBundle>;
+export type AnyEntity = Entity<ComponentBundle>;
 
 type IsEqual<A, B> = (<T>() => T extends A ? true : false) extends <T>() => T extends B ? true : false ? true : false;
 
@@ -48,7 +47,7 @@ export class World {
 	public get<T extends ComponentBundle, C extends ComponentCtor>(
 		id: Entity<T>,
 		only: Includes<Iterate<T>, GenericOfComponent<ReturnType<C>>> extends true ? C : never,
-	): InferComponent<ReturnType<C>>;
+	): ReturnType<C>;
 
 	public get<C extends ComponentBundle, T extends DynamicBundle>(
 		id: Entity<C>,
@@ -62,7 +61,7 @@ export class World {
 		...dynamic_bundle: T
 	): IterableFunction<LuaTuple<[number, { new: C; old: C }, ...Iterate<InferComponents<T>>]>>;
 
-	public insert(id: AnyEntity, ...dynamic_bundle: DynamicBundle): void;
+	public insert(id: AnyEntity, ...dynamic_bundle: ComponentBundle): void;
 
 	public remove<T extends DynamicBundle>(id: AnyEntity, ...dynamic_bundle: T): T;
 }
