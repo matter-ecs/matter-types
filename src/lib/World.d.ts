@@ -17,13 +17,13 @@ export type Entity<T extends ComponentBundle> = number & {
 
 export type AnyEntity = Entity<ComponentBundle>;
 
-type Includes<T, V> = T extends [infer F, ...infer R] ? (Equals<F, V> extends true ? true : Includes<R, V>) : false;
-
 type Equals<A1, A2> = (<A>() => A extends A2 ? 1 : 0) extends <A>() => A extends A1 ? 1 : 0 ? 1 : 0;
+
+type Includes<T, V> = T extends [infer F, ...infer R] ? (Equals<F, V> extends 1 ? true : Includes<R, V>) : false;
 
 type IncludesAll<T extends ReadonlyArray<unknown>, S extends ReadonlyArray<unknown>> = Equals<
 	{ [P in keyof S]: Includes<T, S[P]> }[number],
-	1
+	true
 > extends 1
 	? true
 	: false;
