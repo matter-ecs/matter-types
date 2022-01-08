@@ -1,8 +1,5 @@
-import { A, L } from "ts-toolbelt";
-
 import {
 	AnyComponent,
-	Component,
 	ComponentBundle,
 	ComponentCtor,
 	DynamicBundle,
@@ -20,12 +17,12 @@ export type Entity<T extends ComponentBundle> = number & {
 
 export type AnyEntity = Entity<ComponentBundle>;
 
-type IsEqual<A, B> = (<T>() => T extends A ? true : false) extends <T>() => T extends B ? true : false ? true : false;
+type Includes<T, V> = T extends [infer F, ...infer R] ? (Equals<F, V> extends true ? true : Includes<R, V>) : false;
 
-type Includes<T, V> = T extends [infer F, ...infer R] ? (IsEqual<F, V> extends true ? true : Includes<R, V>) : false;
+type Equals<A1, A2> = (<A>() => A extends A2 ? 1 : 0) extends <A>() => A extends A1 ? 1 : 0 ? 1 : 0;
 
-type IncludesAll<T extends L.List, S extends L.List> = A.Equals<
-	{ [P in keyof S]: L.Includes<T, S[P]> }[number],
+type IncludesAll<T extends ReadonlyArray<unknown>, S extends ReadonlyArray<unknown>> = Equals<
+	{ [P in keyof S]: Includes<T, S[P]> }[number],
 	1
 > extends 1
 	? true
