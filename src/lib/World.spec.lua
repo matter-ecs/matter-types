@@ -69,14 +69,9 @@ return function()
 
 			local Player = component()
 			local Health = component()
-<<<<<<< HEAD
 			local Poison = component()
 
 			local id = world:spawn(Player(), Poison())
-=======
-
-			local id = world:spawn(Player())
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 
 			expect(world:query(Player):next()).to.be.ok()
 			expect(world:query(Health):next()).to.never.be.ok()
@@ -87,14 +82,10 @@ return function()
 			expect(world:query(Health):next()).to.be.ok()
 			expect(world:size()).to.equal(1)
 
-<<<<<<< HEAD
 			local player, poison = world:remove(id, Player, Poison)
 
 			expect(getmetatable(player)).to.equal(Player)
 			expect(getmetatable(poison)).to.equal(Poison)
-=======
-			world:remove(id, Player)
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 
 			expect(world:query(Player):next()).to.never.be.ok()
 			expect(world:query(Health):next()).to.be.ok()
@@ -227,7 +218,6 @@ return function()
 				},
 				nil,
 				{
-<<<<<<< HEAD
 					1,
 					{
 						old = {
@@ -236,8 +226,6 @@ return function()
 					},
 				},
 				{
-=======
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 					0,
 					{
 						old = {
@@ -286,11 +274,7 @@ return function()
 						expect(count).to.equal(2)
 
 						expect(results[0].old.generation).to.equal(2)
-<<<<<<< HEAD
 						expect(results[1].old.generation).to.equal(1)
-=======
-						expect(results[1].new.generation).to.equal(1)
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 					end
 				end,
 				event = "infrequent",
@@ -329,11 +313,7 @@ return function()
 				})
 			)
 
-<<<<<<< HEAD
 			local secondEntityId = world:spawn(
-=======
-			world:spawn(
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 				A({
 					generation = 1,
 				}),
@@ -343,11 +323,8 @@ return function()
 			defaultBindable:Fire()
 			defaultBindable:Fire()
 
-<<<<<<< HEAD
 			world:replace(secondEntityId, B())
 
-=======
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 			world:despawn(entityId)
 
 			defaultBindable:Fire()

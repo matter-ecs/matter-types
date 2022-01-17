@@ -267,10 +267,6 @@ function Loop:begin(events)
 
 		local lastTime = os.clock()
 		local generation = false
-<<<<<<< HEAD
-=======
-		local lastSystem = nil
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 
 		local function stepSystems()
 			local currentTime = os.clock()
@@ -287,7 +283,6 @@ function Loop:begin(events)
 						deltaTime = deltaTime,
 					},
 				}, function()
-<<<<<<< HEAD
 					local fn = systemFn(system)
 					debug.profilebegin("system: " .. systemName(system))
 
@@ -306,14 +301,6 @@ function Loop:begin(events)
 							):format(systemName(system))
 						)
 					end
-=======
-					lastSystem = system
-
-					local fn = systemFn(system)
-					debug.profilebegin("system: " .. systemName(system))
-
-					local success, errorValue = xpcall(fn, debug.traceback, unpack(self._state, 1, self._stateLength))
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 
 					if not success then
 						if os.clock() - recentErrorLastTime > 10 then
@@ -335,38 +322,6 @@ function Loop:begin(events)
 			end
 		end
 
-<<<<<<< HEAD
-=======
-		local runningThread = nil
-
-		local function coroutineMiddleware(nextFn)
-			return function()
-				if runningThread then
-					coroutine.close(runningThread)
-
-					task.spawn(
-						error,
-						(
-							"Matter: System %s yielded last frame and prevented systems after it from running. "
-							.. "The thread has now been closed. Please do not yield in your systems."
-						):format(systemName(lastSystem[eventName]))
-					)
-				end
-
-				runningThread = coroutine.create(function()
-					nextFn()
-
-					lastSystem = nil
-					runningThread = nil
-				end)
-
-				task.spawn(runningThread)
-			end
-		end
-
-		stepSystems = coroutineMiddleware(stepSystems)
-
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 		for _, middleware in ipairs(self._middlewares) do
 			stepSystems = middleware(stepSystems)
 
@@ -410,13 +365,8 @@ end
 	:::
 	@param middleware (nextFn: () -> ()) -> () -> ()
 ]=]
-<<<<<<< HEAD
 function Loop:addMiddleware(middleware: (nextFn: () -> ()) -> () -> ())
 	table.insert(self._middlewares, middleware)
-=======
-function Loop:addMiddleware(fn: (nextFn: () -> ()) -> () -> ())
-	table.insert(self._middlewares, fn)
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 end
 
 return Loop
