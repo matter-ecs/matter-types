@@ -40,7 +40,6 @@ local Llama = require(script.Parent.Parent.Llama)
 	```
 ]=]
 
-<<<<<<< HEAD
 local function newComponent(name)
 	name = name or debug.info(2, "s") .. "@" .. debug.info(2, "l")
 
@@ -52,12 +51,6 @@ local function newComponent(name)
 	end
 
 	--[=[
-=======
--- Workaround for moonwave bug
-local docsDummy = {}
-
---[=[
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	@within Component
 
 	```lua
@@ -85,30 +78,12 @@ local docsDummy = {}
 
 	@param partialNewData {} -- The table to be merged with the existing component data.
 	@return ComponentInstance -- A copy of the component instance with values from `partialNewData` overriding existing values.
-<<<<<<< HEAD
 	]=]
 	function component:patch(partialNewData)
 		debug.profilebegin("patch")
 		local patch = getmetatable(self).new(Llama.Dictionary.merge(self, partialNewData))
 		debug.profileend()
 		return patch
-=======
-]=]
-function docsDummy:patch() end
-
-local function newComponent(name)
-	name = name or debug.info(2, "s") .. "@" .. debug.info(2, "l")
-
-	local component = {}
-	component.__index = component
-
-	function component.new(data)
-		return table.freeze(setmetatable(data or {}, component))
-	end
-
-	function component:patch(data)
-		return getmetatable(self).new(Llama.Dictionary.merge(self, data))
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	end
 
 	setmetatable(component, {

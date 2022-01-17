@@ -3,10 +3,7 @@ local Llama = require(script.Parent.Parent.Llama)
 local valueIds = {}
 local nextValueId = 0
 local compatibilityCache = {}
-<<<<<<< HEAD
 local archetypeCache = {}
-=======
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 
 local function getValueId(value)
 	local valueId = valueIds[value]
@@ -23,7 +20,6 @@ function archetypeOf(...)
 	debug.profilebegin("archetypeOf")
 
 	local length = select("#", ...)
-<<<<<<< HEAD
 
 	local currentNode = archetypeCache
 
@@ -43,8 +39,6 @@ function archetypeOf(...)
 		return currentNode._archetype
 	end
 
-=======
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	local list = table.create(length)
 
 	for i = 1, length do
@@ -55,7 +49,6 @@ function archetypeOf(...)
 
 	local archetype = table.concat(list, "_")
 
-<<<<<<< HEAD
 	currentNode._archetype = archetype
 
 	debug.profileend()
@@ -63,16 +56,6 @@ function archetypeOf(...)
 	return archetype
 end
 
-=======
-	debug.profileend()
-	return archetype
-end
-
-function archetypeOfDict(dict)
-	return archetypeOf(unpack(Llama.Dictionary.keys(dict)))
-end
-
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 function areArchetypesCompatible(queryArchetype, targetArchetype)
 	local cachedCompatibility = compatibilityCache[queryArchetype .. "-" .. targetArchetype]
 	if cachedCompatibility ~= nil then
@@ -99,9 +82,5 @@ end
 
 return {
 	archetypeOf = archetypeOf,
-<<<<<<< HEAD
-=======
-	archetypeOfDict = archetypeOfDict,
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	areArchetypesCompatible = areArchetypesCompatible,
 }

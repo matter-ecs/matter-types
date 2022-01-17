@@ -28,14 +28,11 @@ end
 	@class Loop
 
 	The Loop class handles scheduling and *looping* (who would have guessed) over all of your game systems.
-<<<<<<< HEAD
 
 	:::caution Yielding
 	Yielding is not allowed in systems. Doing so will result in the system thread being closed early, but it will not
 	affect other systems.
 	:::
-=======
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 ]=]
 local Loop = {}
 Loop.__index = Loop
@@ -141,7 +138,6 @@ end
 
 local function orderSystemsByDependencies(unscheduledSystems: { System })
 	table.sort(unscheduledSystems, function(a, b)
-<<<<<<< HEAD
 		local priorityA = systemPriority(a)
 		local priorityB = systemPriority(b)
 
@@ -150,9 +146,6 @@ local function orderSystemsByDependencies(unscheduledSystems: { System })
 		end
 
 		return priorityA < priorityB
-=======
-		return systemPriority(a) < systemPriority(b) or systemName(a) < systemName(b)
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	end)
 
 	local scheduledSystemsSet = {}

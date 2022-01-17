@@ -7,10 +7,6 @@ local function cleanup(storage)
 end
 
 --[=[
-<<<<<<< HEAD
-=======
-	@function useEvent
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	@within Matter
 
 	:::info Topologically-aware function

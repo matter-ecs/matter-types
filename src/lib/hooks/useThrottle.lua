@@ -5,10 +5,6 @@ local function cleanup(storage)
 end
 
 --[=[
-<<<<<<< HEAD
-=======
-	@function useThrottle
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	@within Matter
 
 	:::info Topologically-aware function
@@ -38,10 +34,7 @@ end
 
 	@param seconds number -- The number of seconds to throttle for
 	@param discriminator? any -- A unique value to additionally key by
-<<<<<<< HEAD
 	@return boolean -- returns true every x seconds, otherwise false
-=======
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 ]=]
 local function useThrottle(seconds, discriminator)
 	local storage = TopoRuntime.useHookState(discriminator, cleanup)
