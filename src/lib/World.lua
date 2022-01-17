@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 local Archetype = require(script.Parent.Archetype)
 local TopoRuntime = require(script.Parent.TopoRuntime)
 
@@ -5,6 +6,45 @@ local archetypeOf = Archetype.archetypeOf
 local areArchetypesCompatible = Archetype.areArchetypesCompatible
 
 local ERROR_NO_ENTITY = "Entity doesn't exist, use world:contains to check if needed"
+=======
+local Llama = require(script.Parent.Parent.Llama)
+local Archetype = require(script.Parent.Archetype)
+local TopoRuntime = require(script.Parent.TopoRuntime)
+
+local archetypeOfDict = Archetype.archetypeOfDict
+local archetypeOf = Archetype.archetypeOf
+local areArchetypesCompatible = Archetype.areArchetypesCompatible
+
+local ERROR_NO_ENTITY = "Entity doesn't exist, use world:contains to check before inserting"
+
+local function keyByMetatable(list)
+	local result = {}
+
+	for index, entry in ipairs(list) do
+		if typeof(entry) ~= "table" then
+			error(("Non-table in list at index %d"):format(index))
+		end
+
+		local metatable = getmetatable(entry)
+
+		if metatable == nil then
+			error(("Table in list at index %d does not have a metatable"):format(index))
+		end
+
+		if result[metatable] ~= nil then
+			error(
+				("Two tables with the same metatable appear twice in this list, duplicate found at index %d"):format(
+					index
+				)
+			)
+		end
+
+		result[metatable] = entry
+	end
+
+	return result
+end
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 
 --[=[
 	@class World
@@ -21,6 +61,7 @@ World.__index = World
 ]=]
 function World.new()
 	return setmetatable({
+<<<<<<< HEAD
 		-- Map from entity ID -> archetype string
 		_archetypes = {},
 
@@ -41,6 +82,13 @@ function World.new()
 		_size = 0,
 
 		-- Storage for `queryChanged`
+=======
+		_archetypes = {},
+		_entityArchetypes = {},
+		_queryCache = {},
+		_nextId = 0,
+		_size = 0,
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 		_changedStorage = {},
 	}, World)
 end
@@ -56,6 +104,7 @@ function World:spawn(...)
 	self._nextId += 1
 	self._size += 1
 
+<<<<<<< HEAD
 	local components = {}
 	local metatables = {}
 
@@ -78,6 +127,9 @@ function World:spawn(...)
 	self:_transitionArchetype(id, components)
 
 	return id
+=======
+	return self:replace(id, ...)
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 end
 
 function World:_newQueryArchetype(queryArchetype)
@@ -95,25 +147,41 @@ function World:_newQueryArchetype(queryArchetype)
 end
 
 function World:_updateQueryCache(entityArchetype)
+<<<<<<< HEAD
 	for queryArchetype, compatibleArchetypes in pairs(self._queryCache) do
 		if areArchetypesCompatible(queryArchetype, entityArchetype) then
 			compatibleArchetypes[entityArchetype] = true
+=======
+	for queryArchetype, compatibileArchetypes in pairs(self._queryCache) do
+		if areArchetypesCompatible(queryArchetype, entityArchetype) then
+			compatibileArchetypes[entityArchetype] = true
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 		end
 	end
 end
 
 function World:_transitionArchetype(id, components)
+<<<<<<< HEAD
 	debug.profilebegin("transitionArchetype")
 	local newArchetype = nil
 	local oldArchetype = self._entityArchetypes[id]
 
 	if oldArchetype then
+=======
+	local newArchetype
+	local oldArchetype = self._entityArchetypes[id]
+
+	local oldComponents
+	if oldArchetype then
+		oldComponents = self._archetypes[oldArchetype][id]
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 		self._archetypes[oldArchetype][id] = nil
 
 		-- Keep archetypes around because they're likely to exist again in the future
 	end
 
 	if components then
+<<<<<<< HEAD
 		newArchetype = archetypeOf(unpack(self._entityMetatablesCache[id]))
 
 		if self._archetypes[newArchetype] == nil then
@@ -122,14 +190,46 @@ function World:_transitionArchetype(id, components)
 			debug.profilebegin("update query cache")
 			self:_updateQueryCache(newArchetype)
 			debug.profileend()
+=======
+		newArchetype = archetypeOfDict(components)
+
+		for metatable in pairs(components) do
+			local old = oldComponents and oldComponents[metatable]
+			local new = components[metatable]
+
+			if old ~= new then
+				self:_trackChanged(metatable, id, old, new)
+			end
+		end
+	end
+
+	if oldComponents then
+		for metatable in pairs(oldComponents) do
+			if components and components[metatable] then
+				continue
+			end
+
+			self:_trackChanged(metatable, id, oldComponents[metatable], nil)
+		end
+	end
+
+	if newArchetype then
+		if self._archetypes[newArchetype] == nil then
+			self._archetypes[newArchetype] = {}
+
+			self:_updateQueryCache(newArchetype)
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 		end
 
 		self._archetypes[newArchetype][id] = components
 	end
 
 	self._entityArchetypes[id] = newArchetype
+<<<<<<< HEAD
 
 	debug.profileend()
+=======
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 end
 
 --[=[
@@ -138,6 +238,7 @@ end
 
 	@param id number -- The entity ID
 	@param ... ComponentInstance -- The component values to spawn the entity with.
+<<<<<<< HEAD
 ]=]
 function World:replace(id, ...)
 	if not self:contains(id) then
@@ -171,6 +272,16 @@ function World:replace(id, ...)
 	self._entityMetatablesCache[id] = metatables
 
 	self:_transitionArchetype(id, components)
+=======
+	@return number -- The new entity ID.
+]=]
+function World:replace(id, ...)
+	local components = keyByMetatable({ ... })
+
+	self:_transitionArchetype(id, components)
+
+	return id
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 end
 
 --[=[
@@ -179,6 +290,7 @@ end
 	@param id number -- The entity ID
 ]=]
 function World:despawn(id)
+<<<<<<< HEAD
 	local existingComponents = self._archetypes[self._entityArchetypes[id]][id]
 
 	for metatable, component in pairs(existingComponents) do
@@ -186,6 +298,8 @@ function World:despawn(id)
 	end
 
 	self._entityMetatablesCache[id] = nil
+=======
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	self:_transitionArchetype(id, nil)
 
 	self._size -= 1
@@ -201,7 +315,10 @@ end
 function World:clear()
 	self._entityArchetypes = {}
 	self._archetypes = {}
+<<<<<<< HEAD
 	self._entityMetatablesCache = {}
+=======
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	self._size = 0
 end
 
@@ -220,7 +337,11 @@ end
 
 	@param id number -- The entity ID
 	@param ... Component -- The components to fetch
+<<<<<<< HEAD
 	@return ... -- Returns the component values in the same order they were passed in
+=======
+	@return ... -y Returns the component values in the same order they were passed in
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 ]=]
 function World:get(id, ...)
 	if not self:contains(id) then
@@ -244,6 +365,34 @@ function World:get(id, ...)
 	return unpack(components, 1, length)
 end
 
+<<<<<<< HEAD
+=======
+function World:_getCompatibleStorages(archetype)
+	debug.profilebegin("World:_getCompatibleStorages")
+
+	if self._queryCache[archetype] == nil then
+		self:_newQueryArchetype(archetype)
+	end
+
+	local compatibleArchetypes = self._queryCache[archetype]
+
+	if compatibleArchetypes == nil then
+		error(("No archetype compatibility information for %s"):format(archetype))
+	end
+
+	local compatibleStorages = {}
+
+	for targetArchetype, map in pairs(self._archetypes) do
+		if compatibleArchetypes[targetArchetype] then
+			table.insert(compatibleStorages, map)
+		end
+	end
+
+	debug.profileend()
+	return compatibleStorages
+end
+
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 --[=[
 	@class QueryResult
 
@@ -379,6 +528,7 @@ function World:query(...)
 	local metatables = { ... }
 	local queryLength = select("#", ...)
 
+<<<<<<< HEAD
 	local archetype = archetypeOf(...)
 
 	if self._queryCache[archetype] == nil then
@@ -390,6 +540,13 @@ function World:query(...)
 	debug.profileend()
 
 	if next(compatibleArchetypes) == nil then
+=======
+	local compatibleStorages = self:_getCompatibleStorages(archetypeOf(...))
+
+	debug.profileend()
+
+	if #compatibleStorages == 0 then
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 		-- If there are no compatible storages avoid creating our complicated iterator
 		return setmetatable({
 			_expand = function() end,
@@ -397,6 +554,11 @@ function World:query(...)
 		}, QueryResult)
 	end
 
+<<<<<<< HEAD
+=======
+	local storageIndex = 1
+	local last
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	local queryOutput = table.create(queryLength)
 
 	local function expand(entityId, entityData)
@@ -411,6 +573,7 @@ function World:query(...)
 		return entityId, unpack(queryOutput, 1, queryLength)
 	end
 
+<<<<<<< HEAD
 	local compatibleArchetype = next(compatibleArchetypes)
 	local lastEntityId
 	local function nextItem()
@@ -426,6 +589,21 @@ function World:query(...)
 			entityId, entityData = next(self._archetypes[compatibleArchetype])
 		end
 		lastEntityId = entityId
+=======
+	local function nextItem()
+		local entityId, entityData = next(compatibleStorages[storageIndex], last)
+
+		while entityId == nil do
+			storageIndex += 1
+
+			if compatibleStorages[storageIndex] == nil then
+				return
+			end
+
+			entityId, entityData = next(compatibleStorages[storageIndex])
+		end
+		last = entityId
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 
 		return entityId, entityData
 	end
@@ -450,9 +628,12 @@ end
 
 	Queries for components that have changed **since the last time your system ran `queryChanged`**.
 
+<<<<<<< HEAD
 	Only one changed record is returned per entity, even if the same entity changed multiple times. The order
 	in which changed records are returned is not guaranteed to be the order that the changes occurred in.
 
+=======
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	It should be noted that `queryChanged` does not have the same iterator invalidation limitations as `World:query`.
 
 	:::caution
@@ -521,18 +702,31 @@ end
 	@param ...? Component -- Additional query components. Checked at time of iteration, not time of change.
 	@return () -> (id, ChangeRecord, ...ComponentInstance) -- Iterator of entity ID followed by the requested component values, in order
 ]=]
+<<<<<<< HEAD
 function World:queryChanged(componentToTrack, ...)
 	local hookState = TopoRuntime.useHookState(componentToTrack)
 
 	if not hookState.storage then
 		if not self._changedStorage[componentToTrack] then
 			self._changedStorage[componentToTrack] = {}
+=======
+function World:queryChanged(metatable, ...)
+	local hookState = TopoRuntime.useHookState(metatable)
+
+	if not hookState.storage then
+		if not self._changedStorage[metatable] then
+			self._changedStorage[metatable] = {}
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 		end
 
 		local storage = {}
 		hookState.storage = storage
 
+<<<<<<< HEAD
 		table.insert(self._changedStorage[componentToTrack], storage)
+=======
+		table.insert(self._changedStorage[metatable], storage)
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	end
 
 	local queryLength = select("#", ...)
@@ -583,10 +777,13 @@ function World:_trackChanged(metatable, id, old, new)
 		return
 	end
 
+<<<<<<< HEAD
 	if old == new then
 		return
 	end
 
+=======
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	local record = table.freeze({
 		old = old,
 		new = new,
@@ -618,13 +815,17 @@ end
 	@param ... ComponentInstance -- The component values to insert
 ]=]
 function World:insert(id, ...)
+<<<<<<< HEAD
 	debug.profilebegin("insert")
+=======
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	if not self:contains(id) then
 		error(ERROR_NO_ENTITY, 2)
 	end
 
 	local existingComponents = self._archetypes[self._entityArchetypes[id]][id]
 
+<<<<<<< HEAD
 	local wasNew = false
 	for i = 1, select("#", ...) do
 		local newComponent = select(i, ...)
@@ -647,6 +848,9 @@ function World:insert(id, ...)
 	end
 
 	debug.profileend()
+=======
+	self:_transitionArchetype(id, Llama.Dictionary.merge(existingComponents, keyByMetatable({ ... })))
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 end
 
 --[=[
@@ -665,6 +869,7 @@ function World:remove(id, ...)
 		error(ERROR_NO_ENTITY, 2)
 	end
 
+<<<<<<< HEAD
 	local existingComponents = self._archetypes[self._entityArchetypes[id]][id]
 
 	local length = select("#", ...)
@@ -694,6 +899,26 @@ function World:remove(id, ...)
 	self:_transitionArchetype(id, existingComponents)
 
 	return unpack(removed, 1, length)
+=======
+	local toRemove = Llama.List.toSet({ ... })
+
+	local existingComponents = self._archetypes[self._entityArchetypes[id]][id]
+
+	local newComponents = {}
+	local removed = {}
+
+	for metatable, value in pairs(existingComponents) do
+		if toRemove[metatable] then
+			removed[metatable] = value
+		else
+			newComponents[metatable] = value
+		end
+	end
+
+	self:_transitionArchetype(id, newComponents)
+
+	return removed
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 end
 
 --[=[

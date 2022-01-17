@@ -72,6 +72,7 @@ return function()
 			local loop = Loop.new()
 
 			local order = {}
+<<<<<<< HEAD
 
 			local function cleanupStartReplication()
 				table.insert(order, "e")
@@ -111,6 +112,30 @@ return function()
 					system = cleanupStartReplication,
 					priority = 5000,
 				},
+=======
+			local systemA = {
+				system = function()
+					table.insert(order, "a")
+				end,
+			}
+			local systemB = {
+				system = function()
+					table.insert(order, "b")
+				end,
+				priority = -1,
+			}
+			local systemC = {
+				system = function()
+					table.insert(order, "c")
+				end,
+				priority = 1,
+			}
+
+			loop:scheduleSystems({
+				systemC,
+				systemB,
+				systemA,
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 			})
 
 			local connection = loop:begin({ default = bindable.Event })
@@ -119,12 +144,19 @@ return function()
 
 			bindable:Fire()
 
+<<<<<<< HEAD
 			expect(#order).to.equal(5)
 			expect(order[1]).to.equal("a")
 			expect(order[2]).to.equal("b")
 			expect(order[3]).to.equal("c")
 			expect(order[4]).to.equal("d")
 			expect(order[5]).to.equal("e")
+=======
+			expect(#order).to.equal(3)
+			expect(order[1]).to.equal("b")
+			expect(order[2]).to.equal("a")
+			expect(order[3]).to.equal("c")
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 
 			connection.default:Disconnect()
 		end)

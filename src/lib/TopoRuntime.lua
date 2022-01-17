@@ -41,6 +41,10 @@ local function useFrameState()
 end
 
 --[=[
+<<<<<<< HEAD
+=======
+	@function useHookState
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	@within Matter
 
 	:::tip
@@ -107,7 +111,11 @@ end
 	@param discriminator? any -- A unique value to additionally key by
 	@param cleanupCallback (storage: {}) -> boolean? -- A function to run when the storage for this hook is cleaned up
 ]=]
+<<<<<<< HEAD
 local function useHookState(discriminator, cleanupCallback): {}
+=======
+local function useHookState(uniqueKey, cleanupCallback)
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	local file, line = debug.info(3, "sl")
 	local fn = debug.info(2, "f")
 
@@ -123,12 +131,21 @@ local function useHookState(discriminator, cleanupCallback): {}
 
 	local key = #accessedKeys
 
+<<<<<<< HEAD
 	if discriminator ~= nil then
 		if type(discriminator) == "number" then
 			discriminator = tostring(discriminator)
 		end
 
 		key = discriminator
+=======
+	if uniqueKey ~= nil then
+		if type(uniqueKey) == "number" then
+			uniqueKey = tostring(uniqueKey)
+		end
+
+		key = uniqueKey
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	end
 
 	accessedKeys[key] = true

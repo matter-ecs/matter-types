@@ -7,6 +7,10 @@ local function cleanup(storage)
 end
 
 --[=[
+<<<<<<< HEAD
+=======
+	@function useEvent
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	@within Matter
 
 	:::info Topologically-aware function
@@ -71,7 +75,11 @@ end
 	@param instance Instance -- The instance that has the event you want to connect to
 	@param event string | RBXScriptSignal -- The name of or actual event that you want to connect to
 ]=]
+<<<<<<< HEAD
 local function useEvent(instance, event): () -> (number, ...any)
+=======
+local function useEvent(instance, event)
+>>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
 	assert(instance ~= nil, "Instance is nil")
 	assert(event ~= nil, "Event is nil")
 
