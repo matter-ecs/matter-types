@@ -1,0 +1,1 @@
+export function useHookState<T extends {[index: string]: unknown}>(discriminator?: unknown, cleanupCallback?: (storage: T ) => boolean | undefined): Partial<T>
