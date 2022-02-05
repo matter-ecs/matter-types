@@ -1,6 +1,8 @@
-type System<T extends Array<unknown>> = (
-	...args: T
-) => void | { system: (...args: T) => void; event?: string; priority: number; after: undefined | {} };
+type SystemFn <T extends Array<unknown>>= (...params: T) => void
+
+type SystemStruct<T extends Array<unknown>> = {system: SystemFn<T>, event?: string, priority?: number, after?: Array<SystemFn<T> | SystemStruct<T>>}
+
+type System<T extends Array<unknown>> = SystemFn<T> | SystemStruct<T>
 
 export class Loop<T extends Array<unknown>> {
 	public constructor(...dynamic_bundle: T);
