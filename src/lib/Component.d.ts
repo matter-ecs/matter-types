@@ -12,7 +12,7 @@ type PatchOverride<Base, Overrides> = Id<{
 		: "never";
 }>;
 
-export type Component<T extends { [index: string]: unknown }> = T & {
+export type Component<T extends { readonly [index: string]: unknown }> = T & {
 	patch<U>(data: U): Component<PatchOverride<T, U>>;
 };
 
