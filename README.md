@@ -1,7 +1,7 @@
 # @rbxts/matter
 [![NPM](https://nodei.co/npm/@rbxts/matter.png)](https://npmjs.org/package/@rbxts/matter)
 
-Roblox-TS typings for Matter made by `@evaera` and `@lpghatguy`,
+Roblox-TS typings for Matter made by [@evaera](https://github.com/evaera) and [@lpghatguy](https://github.com/lpghatguy).
 
 ## Installation:
 
