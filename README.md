@@ -1,4 +1,6 @@
-# @rbxts/profileservice
+# @rbxts/matter
+
+Roblox-TS typings for Matter made by `@evaera` and `@lpghatguy`,
 
 [![NPM](https://nodei.co/npm/@rbxts/matter.png)](https://npmjs.org/package/@rbxts/matter)
 
@@ -29,7 +31,7 @@ assert(world.get(Jade, Amount).amount === 1000)
 ```
 
 
-See [MadStudioRoblox/ProfileService](https://github.com/MadStudioRoblox/ProfileService)
+See [Evaera/Matter](https://eryn.io/matter/)
 
 ## Changelog
 
