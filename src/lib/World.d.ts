@@ -58,14 +58,16 @@ export class World {
 	public queryChanged<C extends ComponentCtor, T extends DynamicBundle>(
 		mt: C,
 		...dynamic_bundle: T
-	): IterableFunction<LuaTuple<[Entity<[ReturnType<C>]>, { new: ReturnType<C> | undefined; old: ReturnType<C> }, ...Iterate<InferComponents<T>>]>>;
+	): IterableFunction<LuaTuple<[Entity<[ReturnType<C>]>, { new: ReturnType<C> | undefined; old: ReturnType<C> }, ...InferComponents<T>]>>;
 
 	public insert(id: AnyEntity, ...dynamic_bundle: ComponentBundle): void;
 
 	public remove<T extends DynamicBundle>(id: AnyEntity, ...dynamic_bundle: T): T;
+
+	public size(): number
 }
 
-type Iterate<A extends ComponentBundle> = A extends []
+export type Iterate<A extends ComponentBundle> = A extends []
 	? A
 	: A extends [infer F, ...infer B]
 	? F extends AnyComponent
