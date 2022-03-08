@@ -1,7 +1,7 @@
 # @rbxts/matter
 [![NPM](https://nodei.co/npm/@rbxts/matter.png)](https://npmjs.org/package/@rbxts/matter)
 
-Roblox-TS typings for Matter made by [@evaera](https://github.com/evaera) and [@lpghatguy](https://github.com/lpghatguy).
+Roblox-TS typings for [Matter](https://github.com/evaera/matter) made by [@evaera](https://github.com/evaera) and [@lpghatguy](https://github.com/lpghatguy).
 
 ## Installation:
 
@@ -22,20 +22,23 @@ const Marcus = world.spawn(Balance({ amount: 1000 }), Name({ name: "Marcus" }), 
 const Jade = world.spawn(Balance({ amount: 1000 }), Name({ name: "Jade" }), WantsMoney({ flag: false }))
 
 for (const [entity_id, bal, name, wants_money] of world.query(Balance, Name, WantsMoney)) {
-  if (wants_money.flag) bal.patch({ amount: bal.amount += 500 })
+  if (wants_money.flag) world.insert(entity_id, bal.patch({ amount: bal.amount + 500 }))
 }
 
 assert(world.get(Marcus, Amount).amount === 1500)
 assert(world.get(Jade, Amount).amount === 1000)
 ```
 
+To see Matter used in a game, see [Ukendio/For-Animia](https://github.com/ukendio/for-animia)
 
-See [Evaera/Matter](https://eryn.io/matter/)
+### Documentation
+
+See [Evaera/Matter](https://eryn.io/matter/) 
 
 ## Changelog
 
 ### 0.0.1
 
-- Republished Matter V1.0.0 (from GitHub commit [d0df77f ](https://github.com/evaera/matter/commit/2205dc084c7ad090c671fa3853b69193652ff4c7))
+- Republished Matter (from GitHub commit [d0df77f](https://github.com/evaera/matter/commit/2205dc084c7ad090c671fa3853b69193652ff4c7))
 
 
