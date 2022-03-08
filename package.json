@@ -10,6 +10,12 @@
   },
   "keywords": [],
   "author": "",
+  "contributors": [
+    "Evaera",
+    "Lpghatguy",
+    "Ukendio <- did nothing"
+  ],
+  "homepage": "https://eryn.io/matter/",
   "license": "ISC",
   "types": "src/lib/index.d.ts",
   "files": [
