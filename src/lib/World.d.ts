@@ -78,7 +78,8 @@ export type Iterate<A extends ComponentBundle> = A extends []
 	: never;
 
 type QueryResult<T extends ComponentBundle> = IterableFunction<LuaTuple<[Entity<T>, ...T]>> & {
-	without: (this: QueryResult<T>, ...components: DynamicBundle) => IterableFunction<LuaTuple<[Entity<T>, ...T]>>;
+	without: (this: QueryResult<T>, ...components: DynamicBundle) => QueryResult<T>
+	next: () => LuaTuple<[Entity<T>, ...T]>
 };
 
 export type FilterOut<T extends Array<unknown>, F> = T extends [infer L, ...infer R]
