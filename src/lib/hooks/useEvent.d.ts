@@ -10,6 +10,6 @@ export function useEvent<I extends Instance, E extends InstanceEventNames<I>>(
 ): IterableFunction<LuaTuple<[index: number, ...rest: InferSignalParameters<InstanceEvents<I>[E]>]>>;
 
 export function useEvent<E extends SignalLike>(
-	discriminator: string,
+	discriminator: unknown,
 	event: E,
 ): IterableFunction<LuaTuple<[index: number, ...rest: InferSignalParameters<E>]>>;
