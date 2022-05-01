@@ -1,3 +1,5 @@
+import Llama from "@rbxts/llama";
+
 export type AnyComponent = Component<{ [index: string]: unknown }>;
 export type ComponentCtor = () => AnyComponent;
 
@@ -12,8 +14,10 @@ type PatchOverride<Base, Overrides> = Id<{
 		: "never";
 }>;
 
+type NoneKeys<T extends {[index: string]: unknown}> = { [K in keyof T]: T[K] | Llama.None }
+
 export type Component<T extends { [index: string]: unknown }> = { readonly [K in keyof T]: T[K] } & {
-	patch<U>(data: U): Component<PatchOverride<T, U>>;
+	patch<U extends Partial<T>>(data: NoneKeys<U>): Component<PatchOverride<T, U>>;
 }
 
 export type GenericOfComponent<T> = T extends Component<infer A> ? A : never;
