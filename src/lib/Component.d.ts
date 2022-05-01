@@ -17,7 +17,7 @@ type PatchOverride<Base, Overrides> = Id<{
 type OptionalKeys<T extends {[index: string]: unknown}> = { [K in keyof T]: T[K] | None }
 
 export type Component<T extends { [index: string]: unknown }> = { readonly [K in keyof T]: T[K] } & {
-	patch<U extends Partial<T>>(data: OptionalKeys<U>): Component<PatchOverride<T, U>>;
+	patch<U extends T>(data: Partial<OptionalKeys<U>>): Component<PatchOverride<T, U>>;
 }
 
 export type GenericOfComponent<T> = T extends Component<infer A> ? A : never;
