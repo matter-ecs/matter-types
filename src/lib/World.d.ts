@@ -42,6 +42,8 @@ export class World {
 
 	public contains(id: AnyEntity): boolean;
 
+	public get<T extends DynamicBundle>(id: AnyEntity, ...dynamic_bundle: T): LuaTuple<NullableComponents<InferComponents<T>>> 
+
 	public get<T extends ComponentBundle, C extends ComponentCtor>(
 		id: Entity<T>,
 		only: Includes<Iterate<T>, GenericOfComponent<ReturnType<C>>> extends true ? C : never,
@@ -51,8 +53,6 @@ export class World {
 		id: Entity<C>,
 		...dynamic_bundle: IncludesAll<Iterate<C>, Iterate<InferComponents<T>>> extends true ? T : never
 	): LuaTuple<InferComponents<T>>;
-
-	public get<T extends DynamicBundle>(id: AnyEntity, ...dynamic_bundle: T): LuaTuple<NullableComponents<InferComponents<T>>> 
 
 	public query<T extends DynamicBundle>(...dynamic_bundle: T): QueryResult<InferComponents<T>>;
 
