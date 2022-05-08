@@ -11,10 +11,11 @@ import {
 export type Entity<T extends ComponentBundle> = number & {
 	/**
 	 * @hidden
-	 * @deprecated
 	 */
-	readonly _nominal_entity: T;
-};
+	readonly __nominal_entity: T
+}
+
+export type GenericOfEntity<T> = T extends Entity<infer a> ? a : never
 
 export type AnyEntity = Entity<ComponentBundle>;
 
@@ -42,7 +43,7 @@ export class World {
 
 	public contains(id: AnyEntity): boolean;
 
-	public get<a extends AnyEntity, T extends ComponentCtor>(entity: a, only: T): Includes<a["_nominal_entity"], ReturnType<T>> extends true ? 
+	public get<a extends AnyEntity, T extends ComponentCtor>(entity: a, only: T): Includes<GenericOfEntity<a>, ReturnType<T>> extends true ? 
 		ReturnType<T> 
 		: ReturnType<T> | undefined
 
