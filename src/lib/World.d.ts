@@ -42,18 +42,16 @@ export class World {
 
 	public contains(id: AnyEntity): boolean;
 
-	public get<T extends DynamicBundle>(id: AnyEntity, ...dynamic_bundle: T): LuaTuple<NullableComponents<InferComponents<T>>> 
+	public get<a extends AnyEntity, T extends ComponentCtor>(entity: a, only: T): Includes<a["_nominal_entity"], ReturnType<T>> extends true ? 
+		ReturnType<T> 
+		: ReturnType<T> | undefined
 
-	public get<T extends ComponentBundle, C extends ComponentCtor>(
-		id: Entity<T>,
-		only: Includes<Iterate<T>, GenericOfComponent<ReturnType<C>>> extends true ? C : never,
-	): ReturnType<C>;
-
-	public get<C extends ComponentBundle, T extends DynamicBundle>(
-		id: Entity<C>,
-		...dynamic_bundle: IncludesAll<Iterate<C>, Iterate<InferComponents<T>>> extends true ? T : never
-	): LuaTuple<InferComponents<T>>;
-
+	public get<a extends AnyEntity, T extends DynamicBundle, C extends InferComponents<T>>(entity: a, ...bundle: T): a extends Entity<C> ?
+		IncludesAll<Iterate<C>, T> extends true
+		? LuaTuple<C>
+		:never 
+		: LuaTuple<NullableComponents<C>>
+	
 	public query<T extends DynamicBundle>(...dynamic_bundle: T): QueryResult<InferComponents<T>>;
 
 	public queryChanged<C extends ComponentCtor, T extends DynamicBundle>(

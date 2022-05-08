@@ -37,7 +37,7 @@ export type InferComponents<A extends DynamicBundle> = A extends []
 export type NullableComponents<a extends ComponentBundle> = a extends []
 	? a
 	: a extends [infer F, ...infer B]
-	? F extends ComponentCtor
+	? F extends AnyComponent
 		? B extends ComponentBundle
 			? [F | undefined, ...NullableComponents<B>]
 			: never
