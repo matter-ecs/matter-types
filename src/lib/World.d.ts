@@ -5,6 +5,7 @@ import {
 	DynamicBundle,
 	GenericOfComponent,
 	InferComponents,
+	NullableComponents,
 } from "./Component";
 
 export type Entity<T extends ComponentBundle> = number & {
@@ -51,7 +52,7 @@ export class World {
 		...dynamic_bundle: IncludesAll<Iterate<C>, Iterate<InferComponents<T>>> extends true ? T : never
 	): LuaTuple<InferComponents<T>>;
 
-	public get<T extends DynamicBundle>(id: AnyEntity, ...dynamic_bundle: T): LuaTuple<InferComponents<T>> 
+	public get<T extends DynamicBundle>(id: AnyEntity, ...dynamic_bundle: T): LuaTuple<NullableComponents<InferComponents<T>>> 
 
 	public query<T extends DynamicBundle>(...dynamic_bundle: T): QueryResult<InferComponents<T>>;
 

@@ -34,6 +34,16 @@ export type InferComponents<A extends DynamicBundle> = A extends []
 		: never
 	: never;
 
+export type NullableComponents<a extends ComponentBundle> = a extends []
+	? a
+	: a extends [infer F, ...infer B]
+	? F extends ComponentCtor
+		? B extends ComponentBundle
+			? [F | undefined, ...NullableComponents<B>]
+			: never
+		: never
+	: never
+
 export function newComponent<T extends { [index: string]: unknown }>(
 	name?: string,
 ): {
