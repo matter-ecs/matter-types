@@ -59,7 +59,7 @@ export class World {
 	public queryChanged<C extends ComponentCtor, T extends DynamicBundle>(
 		mt: C,
 		...dynamic_bundle: T
-	): IterableFunction<LuaTuple<[Entity<[ReturnType<C>]>, { new: ReturnType<C> | undefined; old: ReturnType<C> }, ...InferComponents<T>]>>;
+	): IterableFunction<LuaTuple<[Entity<[ReturnType<C>]>, { new: ReturnType<C> | undefined; old: ReturnType<C> | undefined }, ...InferComponents<T>]>>;
 
 	public insert(id: AnyEntity, ...dynamic_bundle: ComponentBundle): void;
 
