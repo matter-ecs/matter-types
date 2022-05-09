@@ -50,7 +50,7 @@ export class World {
 	public get<a extends AnyEntity, T extends DynamicBundle, C extends InferComponents<T>>(entity: a, ...bundle: T): a extends Entity<C> ?
 		IncludesAll<Iterate<C>, T> extends true
 		? LuaTuple<C>
-		:never 
+		: never 
 		: LuaTuple<NullableComponents<C>>
 	
 	public query<T extends DynamicBundle>(...dynamic_bundle: T): QueryResult<InferComponents<T>>;
