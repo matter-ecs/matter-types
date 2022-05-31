@@ -1,6 +1,6 @@
 import None from "./None";
 
-export type AnyComponent = Component<{ [index: string]: unknown }>;
+export type AnyComponent = Component<object>;
 export type ComponentCtor = () => AnyComponent;
 
 export type ComponentBundle = Array<AnyComponent>;
@@ -14,9 +14,9 @@ type PatchOverride<Base, Overrides> = Id<{
 		: "never";
 }>;
 
-type OptionalKeys<T extends {[index: string]: unknown}> = { [K in keyof T]: T[K] | None }
+type OptionalKeys<T extends object> = { [K in keyof T]: T[K] | None }
 
-export type Component<T extends { [index: string]: unknown }> = { readonly [K in keyof T]: T[K] } & {
+export type Component<T extends object> = { readonly [K in keyof T]: T[K] } & {
 	patch<U extends T>(data: Partial<OptionalKeys<U>>): Component<PatchOverride<T, U>>;
 }
 
@@ -44,7 +44,7 @@ export type NullableComponents<a extends ComponentBundle> = a extends []
 		: never
 	: never
 
-export function newComponent<T extends { [index: string]: unknown }>(
+export function newComponent<T extends object>(
 	name?: string,
 ): {
 	(data?: T): Component<T>;
