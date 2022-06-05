@@ -27,9 +27,14 @@
 	@within Matter
 	@function component
 	@param name? string -- Optional name for debugging purposes
+	@param defaultData? {} -- Default data that will be merged with data passed to the component when created
 	@return Component -- Your new type of component
 
 	Creates a new type of component. Call the component as a function to create an instance of that component.
+
+	If `defaultData` is specified, it will be merged with data passed to the component when the component instance is
+	created. Note that this is not *fallback* data: if you later remove a field from a component instance that is
+	specified in the default data, it won't fall back to the value specified in default data.
 
 	```lua
 	-- Component:
@@ -42,10 +47,13 @@
 	```
 ]=]
 
-local Llama = require(script.Parent.Llama)
+local immutable = require(script.immutable)
 local World = require(script.World)
 local Loop = require(script.Loop)
-local newComponent = require(script.Component).newComponent
+local newComponent = require(script.component).newComponent
+
+export type World = typeof(World.new())
+export type Loop = typeof(Loop.new())
 
 return {
 	World = World,
@@ -56,8 +64,8 @@ return {
 	useEvent = require(script.hooks.useEvent),
 	useDeltaTime = require(script.hooks.useDeltaTime),
 	useThrottle = require(script.hooks.useThrottle),
-	useHookState = require(script.TopoRuntime).useHookState,
+	useHookState = require(script.topoRuntime).useHookState,
 
-	merge = Llama.Dictionary.merge,
-	None = Llama.None,
+	merge = immutable.merge,
+	None = immutable.None,
 }

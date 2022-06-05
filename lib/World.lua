@@ -1,8 +1,11 @@
-local Archetype = require(script.Parent.Archetype)
-local TopoRuntime = require(script.Parent.TopoRuntime)
+local archetype = require(script.Parent.archetype)
+local topoRuntime = require(script.Parent.topoRuntime)
+local Component = require(script.Parent.component)
 
-local archetypeOf = Archetype.archetypeOf
-local areArchetypesCompatible = Archetype.areArchetypesCompatible
+local assertValidComponentInstance = Component.assertValidComponentInstance
+local assertValidComponent = Component.assertValidComponent
+local archetypeOf = archetype.archetypeOf
+local areArchetypesCompatible = archetype.areArchetypesCompatible
 
 local ERROR_NO_ENTITY = "Entity doesn't exist, use world:contains to check if needed"
 
@@ -21,10 +24,10 @@ World.__index = World
 ]=]
 function World.new()
 	return setmetatable({
-		-- Map from entity ID -> archetype string
+		-- Map from archetype string --> entity ID --> entity data
 		_archetypes = {},
 
-		-- Map from archetype string --> entity ID --> entity data
+		-- Map from entity ID -> archetype string
 		_entityArchetypes = {},
 
 		-- Cache of the component metatables on each entity. Used for generating archetype.
@@ -61,6 +64,9 @@ function World:spawn(...)
 
 	for i = 1, select("#", ...) do
 		local newComponent = select(i, ...)
+
+		assertValidComponentInstance(newComponent, i)
+
 		local metatable = getmetatable(newComponent)
 
 		if components[metatable] then
@@ -150,6 +156,9 @@ function World:replace(id, ...)
 
 	for i = 1, select("#", ...) do
 		local newComponent = select(i, ...)
+
+		assertValidComponentInstance(newComponent, i)
+
 		local metatable = getmetatable(newComponent)
 
 		if components[metatable] then
@@ -234,12 +243,15 @@ function World:get(id, ...)
 	local length = select("#", ...)
 
 	if length == 1 then
+		assertValidComponent((...), 1)
 		return entity[...]
 	end
 
 	local components = {}
 	for i = 1, length do
-		components[i] = entity[select(i, ...)]
+		local metatable = select(i, ...)
+		assertValidComponent(metatable, i)
+		components[i] = entity[metatable]
 	end
 
 	return unpack(components, 1, length)
@@ -264,6 +276,12 @@ QueryResult.__index = QueryResult
 
 function QueryResult:__call()
 	return self._expand(self._next())
+end
+
+function QueryResult:__iter()
+	return function()
+		return self._expand(self._next())
+	end
 end
 
 --[=[
@@ -294,6 +312,63 @@ end
 ]=]
 function QueryResult:next()
 	return self._expand(self._next())
+end
+
+local snapshot = {
+	__iter = function(self)
+		local i = 0
+		return function()
+			i += 1
+
+			local data = self[i]
+
+			if data then
+				return unpack(data, 1, data.n)
+			end
+		end
+	end,
+}
+
+--[=[
+	Creates a "snapshot" of this query, draining this QueryResult and returning a list containing all of its results.
+
+	By default, iterating over a QueryResult happens in "real time": it iterates over the actual data in the ECS, so
+	changes that occur during the iteration will affect future results.
+
+	By contrast, `QueryResult:snapshot()` creates a list of all of the results of this query at the moment it is called,
+	so changes made while iterating over the result of `QueryResult:snapshot` do not affect future results of the
+	iteration.
+
+	Of course, this comes with a cost: we must allocate a new list and iterate over everything returned from the
+	QueryResult in advance, so using this method is slower than iterating over a QueryResult directly.
+
+	The table returned from this method has a custom `__iter` method, which lets you use it as you would use QueryResult
+	directly:
+
+	```lua
+		for entityId, health, player in world:query(Health, Player):snapshot() do
+
+		end
+	```
+
+	However, the table itself is just a list of sub-tables structured like `{entityId, component1, component2, ...etc}`.
+
+	@return {{entityId: number, component: ComponentInstance, component: ComponentInstance, component: ComponentInstance, ...}}
+]=]
+function QueryResult:snapshot()
+	local list = setmetatable({}, snapshot)
+
+	local function iter()
+		return self._next()
+	end
+
+	for entityId, entityData in iter do
+		if entityId then
+			table.insert(list, table.pack(self._expand(entityId, entityData)))
+		end
+	end
+
+	return list
 end
 
 --[=[
@@ -377,6 +452,8 @@ end
 ]=]
 function World:query(...)
 	debug.profilebegin("World:query")
+	assertValidComponent((...), 1)
+
 	local metatables = { ... }
 	local queryLength = select("#", ...)
 
@@ -454,7 +531,7 @@ end
 	Only one changed record is returned per entity, even if the same entity changed multiple times. The order
 	in which changed records are returned is not guaranteed to be the order that the changes occurred in.
 
-	It should be noted that `queryChanged` does not have the same iterator invalidation limitations as `World:query`.
+	It should be noted that `queryChanged` does not have the same iterator invalidation concerns as `World:query`.
 
 	:::caution
 	The first time your system runs (i.e., on the first frame), no results are returned. Results only begin to be
@@ -470,33 +547,22 @@ end
 	every frame, **until the end of time**.
 	:::
 
-	### Arguments
-
-	The first argument to `queryChanged` is the component for which you want to track changes.
-	Further arguments are optional, and if passed, are an additional filter on what entities will be returned.
-
-	:::caution
-	Additional query arguments are checked against *at the time of iteration*, not when the change ocurred.
-	This has the additional implication that entities that have been despawned will never be returned from
-	`queryChanged` if additional query arguments are passed, because the entity will have no components, so cannot
-	possibly pass any additional query.
-	:::
-
-	If no additional query arguments are passed, all changes (including despawns) will be tracked and returned.
-
 	### Returns
 	`queryChanged` returns an iterator function, so you call it in a for loop just like `World:query`.
 
-	The iterator returns the entity ID, followed by a [`ChangeRecord`](#ChangeRecord), followed by the component
-	instance values of any additional query arguments that were passed (as discussed above).
+	The iterator returns the entity ID, followed by a [`ChangeRecord`](#ChangeRecord).
 
-	The ChangeRecord type is a table that contains two fields, `new` and `old`, respectively containing the new
+	The `ChangeRecord` type is a table that contains two fields, `new` and `old`, respectively containing the new
 	component instance, and the old component instance. `new` and `old` will never be the same value.
 
 	`new` will be nil if the component was removed (or the entity was despawned), and `old` will be nil if the
 	component was just added.
 
-	The ChangeRecord table is given to all systems tracking changes for this component, and cannot be modified.
+	The `old` field will be the value of the component the last time this system observed it, not
+	necessarily the value it changed from most recently.
+
+	The `ChangeRecord` table is potentially shared with multiple systems tracking changes for this component, so it
+	cannot be modified.
 
 	```lua
 	for id, modelRecord, enemy in world:queryChanged(Model, Enemy) do
@@ -519,11 +585,14 @@ end
 	:::
 
 	@param componentToTrack Component -- The component you want to listen to changes for.
-	@param ...? Component -- Additional query components. Checked at time of iteration, not time of change.
 	@return () -> (id, ChangeRecord, ...ComponentInstance) -- Iterator of entity ID followed by the requested component values, in order
 ]=]
-function World:queryChanged(componentToTrack, ...)
-	local hookState = TopoRuntime.useHookState(componentToTrack)
+function World:queryChanged(componentToTrack, ...: nil)
+	if ... then
+		error("World:queryChanged does not take any additional parameters", 2)
+	end
+
+	local hookState = topoRuntime.useHookState(componentToTrack)
 
 	if not hookState.storage then
 		if not self._changedStorage[componentToTrack] then
@@ -536,47 +605,15 @@ function World:queryChanged(componentToTrack, ...)
 		table.insert(self._changedStorage[componentToTrack], storage)
 	end
 
-	local queryLength = select("#", ...)
-	local queryOutput = table.create(queryLength)
-	local queryMetatables = { ... }
-
-	if #queryMetatables == 0 then
-		return function()
-			local entityId, component = next(hookState.storage)
-
-			if entityId then
-				hookState.storage[entityId] = nil
-
-				return entityId, component
-			end
-		end
-	end
-
-	local function queryIterator()
+	return function()
 		local entityId, component = next(hookState.storage)
 
 		if entityId then
 			hookState.storage[entityId] = nil
 
-			-- If the entity doesn't currently contain the requested components, don't return anything
-			if not self:contains(entityId) then
-				return queryIterator()
-			end
-
-			for i, queryMetatable in ipairs(queryMetatables) do
-				local queryComponent = self:get(entityId, queryMetatable)
-				if not queryComponent then
-					return queryIterator()
-				end
-
-				queryOutput[i] = queryComponent
-			end
-
-			return entityId, component, unpack(queryOutput, 1, queryLength)
+			return entityId, component
 		end
 	end
-
-	return queryIterator
 end
 
 function World:_trackChanged(metatable, id, old, new)
@@ -594,7 +631,14 @@ function World:_trackChanged(metatable, id, old, new)
 	})
 
 	for _, storage in ipairs(self._changedStorage[metatable]) do
-		storage[id] = record
+		-- If this entity has changed since the last time this system read it,
+		-- we ensure that the "old" value is whatever the system saw it as last, instead of the
+		-- "old" value we have here.
+		if storage[id] then
+			storage[id] = table.freeze({ old = storage[id].old, new = new })
+		else
+			storage[id] = record
+		end
 	end
 end
 
@@ -629,7 +673,11 @@ function World:insert(id, ...)
 	local wasNew = false
 	for i = 1, select("#", ...) do
 		local newComponent = select(i, ...)
+
+		assertValidComponentInstance(newComponent, i)
+
 		local metatable = getmetatable(newComponent)
+
 		local oldComponent = existingComponents[metatable]
 
 		if not oldComponent then
@@ -673,6 +721,8 @@ function World:remove(id, ...)
 
 	for i = 1, length do
 		local metatable = select(i, ...)
+
+		assertValidComponent(metatable, i)
 
 		local oldComponent = existingComponents[metatable]
 

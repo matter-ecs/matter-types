@@ -110,8 +110,8 @@ return function()
 			)
 
 			world:spawn( -- Spawn something we don't want to get back
-				component(),
-				component()
+				component()(),
+				component()()
 			)
 
 			local two = world:spawn(
@@ -240,7 +240,13 @@ return function()
 			local additionalQuery = C
 			loop:scheduleSystem(function(w)
 				local ran = false
-				for entityId, record in w:queryChanged(A, additionalQuery) do
+				for entityId, record in w:queryChanged(A) do
+					if additionalQuery then
+						if w:get(entityId, additionalQuery) == nil then
+							continue
+						end
+					end
+
 					ran = true
 					resultIndex += 1
 
@@ -270,11 +276,20 @@ return function()
 					if count == 0 then
 						expect(infrequentCount).to.equal(1)
 					else
-						expect(infrequentCount).to.equal(2)
-						expect(count).to.equal(2)
+						if infrequentCount == 2 then
+							expect(count).to.equal(2)
 
-						expect(results[0].old.generation).to.equal(2)
-						expect(results[1].old.generation).to.equal(1)
+							expect(results[0].old).to.equal(nil)
+							expect(results[0].new.generation).to.equal(2)
+							expect(results[1].old).to.equal(nil)
+							expect(results[1].new).to.equal(nil)
+						elseif infrequentCount == 3 then
+							expect(results[0].old.generation).to.equal(2)
+							expect(results[0].new).to.equal(nil)
+							expect(count).to.equal(1)
+						else
+							error("infrequentCount too high")
+						end
 					end
 				end,
 				event = "infrequent",
@@ -325,11 +340,80 @@ return function()
 
 			world:replace(secondEntityId, B())
 
+			infrequentBindable:Fire()
+
 			world:despawn(entityId)
 
 			defaultBindable:Fire()
 
 			infrequentBindable:Fire()
+		end)
+
+		it("should error when passing nil to query", function()
+			expect(function()
+				World.new():query(nil)
+			end).to.throw()
+		end)
+
+		it("should error when passing an invalid table", function()
+			local world = World.new()
+			local id = world:spawn()
+
+			expect(function()
+				world:insert(id, {})
+			end).to.throw()
+		end)
+
+		it("should error when passing a Component instead of Component instance", function()
+			expect(function()
+				World.new():spawn(component())
+			end).to.throw()
+		end)
+
+		it("should allow snapshotting a query", function()
+			local world = World.new()
+
+			local Player = component()
+			local Health = component()
+			local Poison = component()
+
+			local one = world:spawn(
+				Player({
+					name = "alice",
+				}),
+				Health({
+					value = 100,
+				}),
+				Poison()
+			)
+
+			world:spawn( -- Spawn something we don't want to get back
+				component()(),
+				component()()
+			)
+
+			local two = world:spawn(
+				Player({
+					name = "bob",
+				}),
+				Health({
+					value = 99,
+				})
+			)
+
+			local snapshot = world:query(Health, Player):snapshot()
+
+			for entityId, health, player in world:query(Health, Player):snapshot() do
+				expect(type(entityId)).to.equal("number")
+				expect(type(player.name)).to.equal("string")
+				expect(type(health.value)).to.equal("number")
+			end
+
+			world:remove(two, Health)
+			world:despawn(one)
+
+			expect(snapshot[1][1]).to.equal(0)
+			expect(snapshot[2][1]).to.equal(2)
 		end)
 	end)
 end

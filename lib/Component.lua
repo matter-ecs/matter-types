@@ -1,4 +1,4 @@
-local Llama = require(script.Parent.Parent.Llama)
+local merge = require(script.Parent.immutable).merge
 
 --[=[
 	@class Component
@@ -40,14 +40,30 @@ local Llama = require(script.Parent.Parent.Llama)
 	```
 ]=]
 
-local function newComponent(name)
+-- This is a special value we set inside the component's metatable that will allow us to detect when
+-- a Component is accidentally inserted as a Component Instance.
+-- It should not be accessible through indexing into a component instance directly.
+local DIAGNOSTIC_COMPONENT_MARKER = {}
+
+local function newComponent(name, defaultData)
 	name = name or debug.info(2, "s") .. "@" .. debug.info(2, "l")
+
+	assert(
+		defaultData == nil or type(defaultData) == "table",
+		"if component default data is specified, it must be a table"
+	)
 
 	local component = {}
 	component.__index = component
 
 	function component.new(data)
-		return table.freeze(setmetatable(data or {}, component))
+		data = data or {}
+
+		if defaultData then
+			data = merge(defaultData, data)
+		end
+
+		return table.freeze(setmetatable(data, component))
 	end
 
 	--[=[
@@ -81,7 +97,7 @@ local function newComponent(name)
 	]=]
 	function component:patch(partialNewData)
 		debug.profilebegin("patch")
-		local patch = getmetatable(self).new(Llama.Dictionary.merge(self, partialNewData))
+		local patch = getmetatable(self).new(merge(self, partialNewData))
 		debug.profileend()
 		return patch
 	end
@@ -93,11 +109,41 @@ local function newComponent(name)
 		__tostring = function()
 			return name
 		end,
+		[DIAGNOSTIC_COMPONENT_MARKER] = true,
 	})
 
 	return component
 end
 
+local function assertValidComponent(value, position)
+	if typeof(value) ~= "table" then
+		error(string.format("Component #%d is invalid: not a table", position), 3)
+	end
+
+	local metatable = getmetatable(value)
+
+	if metatable == nil then
+		error(string.format("Component #%d is invalid: has no metatable", position), 3)
+	end
+end
+
+local function assertValidComponentInstance(value, position)
+	assertValidComponent(value, position)
+
+	if getmetatable(value)[DIAGNOSTIC_COMPONENT_MARKER] ~= nil then
+		error(
+			string.format(
+				"Component #%d is invalid: passed a Component instead of a Component instance; "
+					.. "did you forget to call it as a function?",
+				position
+			),
+			3
+		)
+	end
+end
+
 return {
 	newComponent = newComponent,
+	assertValidComponentInstance = assertValidComponentInstance,
+	assertValidComponent = assertValidComponent,
 }

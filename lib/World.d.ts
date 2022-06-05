@@ -55,10 +55,7 @@ export class World {
 	
 	public query<T extends DynamicBundle>(...dynamic_bundle: T): QueryResult<InferComponents<T>>;
 
-	public queryChanged<C extends ComponentCtor, T extends DynamicBundle>(
-		mt: C,
-		...dynamic_bundle: T
-	): IterableFunction<LuaTuple<[Entity<[ReturnType<C>]>, { new: ReturnType<C> | undefined; old: ReturnType<C> | undefined }, ...InferComponents<T>]>>;
+	public queryChanged<C extends ComponentCtor>(mt: C): IterableFunction<LuaTuple<[Entity<[ReturnType<C>]>, { new: ReturnType<C> | undefined; old: ReturnType<C> | undefined }]>>;
 
 	public insert(id: AnyEntity, ...dynamic_bundle: ComponentBundle): void;
 
@@ -80,6 +77,7 @@ export type Iterate<A extends ComponentBundle> = A extends []
 type QueryResult<T extends ComponentBundle> = IterableFunction<LuaTuple<[Entity<T>, ...T]>> & {
 	without: (this: QueryResult<T>, ...components: DynamicBundle) => QueryResult<T>
 	next: (this: QueryResult<T>) => LuaTuple<[Entity<T>, ...T]>
+	snapshot: (this: QueryResult<T>) => Readonly<T>
 };
 
 export type FilterOut<T extends Array<unknown>, F> = T extends [infer L, ...infer R]
