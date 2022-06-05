@@ -30,6 +30,12 @@ type IncludesAll<T extends ReadonlyArray<unknown>, S extends ReadonlyArray<unkno
 	? true
 	: false;
 
+type NullableArray<A extends Array<unknown>> = A extends []
+	? A
+	: A extends [infer F, ...infer B] 
+	? [F | undefined, ...NullableArray<B>]
+	: never
+
 export class World {
 	public constructor();
 
@@ -47,11 +53,9 @@ export class World {
 		ReturnType<T> 
 		: ReturnType<T> | undefined
 
-	public get<a extends AnyEntity, T extends DynamicBundle, C extends InferComponents<T>>(entity: a, ...bundle: T): a extends Entity<C> ?
-		IncludesAll<Iterate<C>, T> extends true
-		? LuaTuple<C>
-		: never 
-		: LuaTuple<NullableComponents<C>>
+	public get<a extends AnyEntity, T extends DynamicBundle>(entity: a, ...bundle: T): a extends Entity<InferComponents<T>> ?
+		LuaTuple<InferComponents<T>>
+		: LuaTuple<NullableArray<InferComponents<T>>>
 	
 	public query<T extends DynamicBundle>(...dynamic_bundle: T): QueryResult<InferComponents<T>>;
 
