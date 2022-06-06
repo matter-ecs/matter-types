@@ -5,8 +5,7 @@ import {
 	DynamicBundle,
 	GenericOfComponent,
 	InferComponents,
-	NullableComponents,
-} from "./Component";
+} from "./component";
 
 export type Entity<T extends ComponentBundle> = number & {
 	/**

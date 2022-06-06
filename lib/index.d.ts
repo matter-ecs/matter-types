@@ -1,10 +1,10 @@
-import { AnyComponent, Component, newComponent, InferComponents, GenericOfComponent} from "./Component";
+import { AnyComponent, Component, newComponent, InferComponents, GenericOfComponent} from "./component";
 import { useDeltaTime } from "./hooks/useDeltaTime";
 import { useEvent } from "./hooks/useEvent";
 import { useThrottle } from "./hooks/useThrottle";
 import { Loop } from "./Loop";
 import { None, merge } from "./immutable";
-import { useHookState } from "./TopoRuntime";
+import { useHookState } from "./topoRuntime";
 import { AnyEntity, Entity, World , Iterate } from "./World";
 
 export { 
