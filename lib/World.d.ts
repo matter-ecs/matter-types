@@ -29,11 +29,7 @@ type IncludesAll<T extends ReadonlyArray<unknown>, S extends ReadonlyArray<unkno
 	? true
 	: false;
 
-type NullableArray<A extends Array<unknown>> = A extends []
-	? A
-	: A extends [infer F, ...infer B] 
-	? [F | undefined, ...NullableArray<B>]
-	: never
+type NullableArray<A extends Array<unknown>> = Partial<A> extends Array<unknown> ? Partial<A> : never
 
 export class World {
 	public constructor();
