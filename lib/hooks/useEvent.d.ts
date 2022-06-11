@@ -1,5 +1,5 @@
 interface SignalLike {
-	Connect(callback: (...args: Array<any>) => void): unknown;
+	Connect(callback: (...args: Array<unknown>) => void): unknown;
 }
 
 type InferSignalParameters<S> = S extends SignalLike ? Parameters<Parameters<S["Connect"]>[0]> : never;
