@@ -48,9 +48,8 @@ export class World {
 		ReturnType<T> 
 		: ReturnType<T> | undefined
 
-	public get<a extends AnyEntity, T extends DynamicBundle>(entity: a, ...bundle: T): a extends Entity<InferComponents<T>> ?
-		LuaTuple<InferComponents<T>>
-		: LuaTuple<NullableArray<InferComponents<T>>>
+	public get<a extends AnyEntity, T extends DynamicBundle>(entity: a, ...bundle: T): 
+		LuaTuple<a extends Entity<InferComponents<T>> ? InferComponents<T> : NullableArray<InferComponents<T>>>
 	
 	public query<T extends DynamicBundle>(...dynamic_bundle: T): QueryResult<InferComponents<T>>;
 
