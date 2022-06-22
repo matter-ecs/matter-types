@@ -1,5 +1,6 @@
 import {
 	AnyComponent,
+	Component,
 	ComponentBundle,
 	ComponentCtor,
 	DynamicBundle,
@@ -31,13 +32,49 @@ type IncludesAll<T extends ReadonlyArray<unknown>, S extends ReadonlyArray<unkno
 
 type NullableArray<A extends Array<unknown>> = Partial<A> extends Array<unknown> ? Partial<A> : never
 
-export class World {
+/**
+ * @class World
+ * 
+ * A World contains entities which have components.
+ * The World is queryable and can be used to get entities with a specific set of components.
+ * Entities are simply ever-increasing integers.
+ */
+
+
+type A<T extends ComponentBundle> = { [index in keyof T]: T[index]}
+type a = A<[Component<{foo: "bar"}>]>
+
+export interface World extends IterableFunction<LuaTuple<[AnyEntity, Map<ComponentCtor, AnyComponent>]>> {}
+
+export class World {	
 	public constructor();
 
+	/**
+	 * Spawns a new entity in the world with the given components.
+	 * @param component_bundle - The component values to spawn the entity with.
+	 * @return The new entity ID.
+	 */
 	public spawn<T extends ComponentBundle>(...component_bundle: T): Entity<T>;
 
+	/**
+	 * Spawns a new entity in the world with a specific entity ID and given components.
+	 * The next ID generated from [World:spawn] will be increased as needed to never collide with a manually specified ID.
+	 * @param id - The entity ID to spawn with.
+	 * @param component_bundle - The component values to spawn the entity with.
+	 */
+	public spawnAt<T extends ComponentBundle>(id: number, ...component_bundle: T): Entity<T>
+	/**
+	 * Replaces a given entity by ID with an entirely new set of components.
+	 * Equivalent to removing all components from an entity, and then adding these ones.
+	 * @param id - The entity ID
+	 * @param component_bundle - The component values to spawn the entity with.
+	 */
 	public replace<T extends ComponentBundle>(id: AnyEntity, ...component_bundle: T): Entity<T>;
 
+	/**
+	 * Despawns a given entity by ID, removing it and all its components from the world entirely.
+	 * @param id - The entity ID
+	 */
 	public despawn(id: AnyEntity): void;
 
 	public clear(): void;
