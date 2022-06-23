@@ -5,13 +5,15 @@ type SystemStruct<T extends Array<unknown>> = { system: SystemFn<T>, event?: str
 type System<T extends Array<unknown>> = SystemFn<T> | SystemStruct<T>
 
 /**
+ * @class Loop
+ * 
  * The Loop class handles scheduling and *looping* (who would have guessed) over all of your game systems.
  *
  * Yielding is not allowed in systems. Doing so will result in the system thread being closed early, but it will not
  * affect other systems.
  */
 export class Loop<T extends Array<unknown>> {
-	/*
+	/**
 	 * Creates a new loop. `Loop.new` accepts as arguments the values that will be passed to all of your systems.
 	 *
 	 * So typically, you want to pass the World in here, as well as maybe a table of global game state.
@@ -23,7 +25,7 @@ export class Loop<T extends Array<unknown>> {
 	 * const loop = new Loop(world, gameState)
 	 * ```
 	 *
-	 * @param ... ...any -- Values that will be passed to all of your systems
+	 * @param ...dynamic_bundle - Values that will be passed to all of your systems
 	 * @return Loop
 	 */
 	public constructor(...dynamic_bundle: T);
@@ -59,7 +61,7 @@ export class Loop<T extends Array<unknown>> {
 	 * `scheduleSystems` has to perform nontrivial sorting work each time it's called, so you should avoid calling it multiple
 	 * times if possible.
 	 *
-	 * @param systems { System } -- Array of systems to schedule.
+	 * @param systems - Array of systems to schedule.
 	 */
 	public scheduleSystems<S extends Array<System<T>>>(systems: S): void;
 
@@ -94,7 +96,7 @@ export class Loop<T extends Array<unknown>> {
 	 * `scheduleSystems` has to perform nontrivial sorting work each time it's called, so you should avoid calling it multiple
 	 * times if possible.
 	 *
-	 * @param system System -- System to schedule.
+	 * @param system - System to schedule.
 	 */
 	public scheduleSystem(system: System<T>): void;
 
@@ -123,8 +125,8 @@ export class Loop<T extends Array<unknown>> {
 	 * Returns a table similar to the one you passed in, but the values are `RBXScriptConnection` values (or whatever is
 	 * returned by `:Connect` if you passed in a synthetic event).
 	 *
-	 * @param events { [string]: RBXScriptSignal } -- A map from event name to event objects.
-	 * @return \{ [string]: RBXScriptConnection } -- A map from your event names to connection objects.
+	 * @param events - A map from event name to event objects.
+	 * @return A map from your event names to connection objects.
 	 */
 	public begin<T extends { [index: string]: RBXScriptSignal }>(events: T): { [P in keyof T]: RBXScriptConnection };
 
@@ -145,7 +147,7 @@ export class Loop<T extends Array<unknown>> {
 	 *
 	 * Middleware added later "wraps" middleware that was added earlier. The innermost middleware function is the internal
 	 * function that actually calls your systems.
-	 * @param middleware (nextFn: () => void) => () => void
+	 * @param middleware - (nextFn: () => void) => () => void
 	 */
-	public addMiddleware(fn: (nextFn: () => void) => () => void): void;
+	public addMiddleware(middleware: (nextFn: () => void) => () => void): void;
 }
