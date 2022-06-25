@@ -1,11 +1,11 @@
-local archetype = require(script.Parent.archetype)
+local archetypeModule = require(script.Parent.archetype)
 local topoRuntime = require(script.Parent.topoRuntime)
 local Component = require(script.Parent.component)
 
 local assertValidComponentInstance = Component.assertValidComponentInstance
 local assertValidComponent = Component.assertValidComponent
-local archetypeOf = archetype.archetypeOf
-local areArchetypesCompatible = archetype.areArchetypesCompatible
+local archetypeOf = archetypeModule.archetypeOf
+local areArchetypesCompatible = archetypeModule.areArchetypesCompatible
 
 local ERROR_NO_ENTITY = "Entity doesn't exist, use world:contains to check if needed"
 
@@ -23,9 +23,13 @@ World.__index = World
 	Creates a new World.
 ]=]
 function World.new()
+	local firstStorage = {}
+
 	return setmetatable({
-		-- Map from archetype string --> entity ID --> entity data
-		_archetypes = {},
+		-- List of maps from archetype string --> entity ID --> entity data
+		_storages = { firstStorage },
+		-- The most recent storage that has not been dirtied by an iterator
+		_pristineStorage = firstStorage,
 
 		-- Map from entity ID -> archetype string
 		_entityArchetypes = {},
@@ -36,6 +40,10 @@ function World.new()
 
 		-- Cache of what query archetypes are compatible with what component archetypes
 		_queryCache = {},
+
+		-- Cache of what entity archetypes have ever existed in the game. This is used for knowing
+		-- when to update the queryCache.
+		_entityArchetypeCache = {},
 
 		-- The next ID that will be assigned with World:spawn
 		_nextId = 1,
@@ -48,6 +56,38 @@ function World.new()
 	}, World)
 end
 
+-- Searches all archetype storages for the entity with the given archetype
+-- If found, returns the entity data followed by the storage index the entity was in
+function World:_getStorageWithEntity(archetype, id)
+	for _, storage in self._storages do
+		local archetypeStorage = storage[archetype]
+		if archetypeStorage then
+			if archetypeStorage[id] then
+				return storage
+			end
+		end
+	end
+end
+
+function World:_markStorageDirty()
+	local newStorage = {}
+	table.insert(self._storages, newStorage)
+	self._pristineStorage = newStorage
+
+	if topoRuntime.withinTopoContext() then
+		local frameState = topoRuntime.useFrameState()
+
+		frameState.dirtyWorlds[self] = true
+	end
+end
+
+function World:_getEntity(id)
+	local archetype = self._entityArchetypes[id]
+	local storage = self:_getStorageWithEntity(archetype, id)
+
+	return storage[archetype][id]
+end
+
 function World:_next(last)
 	local entityId, archetype = next(self._entityArchetypes, last)
 
@@ -55,7 +95,9 @@ function World:_next(last)
 		return nil
 	end
 
-	return entityId, self._archetypes[archetype][entityId]
+	local storage = self:_getStorageWithEntity(archetype, entityId)
+
+	return entityId, storage[archetype][entityId]
 end
 
 --[=[
@@ -96,6 +138,16 @@ end
 	@return number -- The same entity ID that was passed in
 ]=]
 function World:spawnAt(id, ...)
+	if self:contains(id) then
+		error(
+			string.format(
+				"The world already contains an entity with ID %d. Use World:replace instead if this is intentional.",
+				id
+			),
+			2
+		)
+	end
+
 	self._size += 1
 
 	if id >= self._nextId then
@@ -136,9 +188,11 @@ function World:_newQueryArchetype(queryArchetype)
 		return -- Archetype isn't actually new
 	end
 
-	for entityArchetype in pairs(self._archetypes) do
-		if areArchetypesCompatible(queryArchetype, entityArchetype) then
-			self._queryCache[queryArchetype][entityArchetype] = true
+	for _, storage in self._storages do
+		for entityArchetype in storage do
+			if areArchetypesCompatible(queryArchetype, entityArchetype) then
+				self._queryCache[queryArchetype][entityArchetype] = true
+			end
 		end
 	end
 end
@@ -155,25 +209,38 @@ function World:_transitionArchetype(id, components)
 	debug.profilebegin("transitionArchetype")
 	local newArchetype = nil
 	local oldArchetype = self._entityArchetypes[id]
+	local oldStorage
 
 	if oldArchetype then
-		self._archetypes[oldArchetype][id] = nil
+		oldStorage = self:_getStorageWithEntity(oldArchetype, id)
 
-		-- Keep archetypes around because they're likely to exist again in the future
+		if not components then
+			oldStorage[oldArchetype][id] = nil
+		end
 	end
 
 	if components then
 		newArchetype = archetypeOf(unpack(self._entityMetatablesCache[id]))
 
-		if self._archetypes[newArchetype] == nil then
-			self._archetypes[newArchetype] = {}
+		if oldArchetype ~= newArchetype then
+			if oldStorage then
+				oldStorage[oldArchetype][id] = nil
+			end
 
-			debug.profilebegin("update query cache")
-			self:_updateQueryCache(newArchetype)
-			debug.profileend()
+			if self._pristineStorage[newArchetype] == nil then
+				self._pristineStorage[newArchetype] = {}
+			end
+
+			if self._entityArchetypeCache[newArchetype] == nil then
+				debug.profilebegin("update query cache")
+				self._entityArchetypeCache[newArchetype] = true
+				self:_updateQueryCache(newArchetype)
+				debug.profileend()
+			end
+			self._pristineStorage[newArchetype][id] = components
+		else
+			oldStorage[newArchetype][id] = components
 		end
-
-		self._archetypes[newArchetype][id] = components
 	end
 
 	self._entityArchetypes[id] = newArchetype
@@ -195,7 +262,7 @@ function World:replace(id, ...)
 
 	local components = {}
 	local metatables = {}
-	local existingComponents = self._archetypes[self._entityArchetypes[id]][id]
+	local entity = self:_getEntity(id)
 
 	for i = 1, select("#", ...) do
 		local newComponent = select(i, ...)
@@ -208,13 +275,13 @@ function World:replace(id, ...)
 			error(("Duplicate component type at index %d"):format(i), 2)
 		end
 
-		self:_trackChanged(metatable, id, existingComponents[metatable], newComponent)
+		self:_trackChanged(metatable, id, entity[metatable], newComponent)
 
 		components[metatable] = newComponent
 		table.insert(metatables, metatable)
 	end
 
-	for metatable, component in pairs(existingComponents) do
+	for metatable, component in pairs(entity) do
 		if not components[metatable] then
 			self:_trackChanged(metatable, id, component, nil)
 		end
@@ -231,9 +298,9 @@ end
 	@param id number -- The entity ID
 ]=]
 function World:despawn(id)
-	local existingComponents = self._archetypes[self._entityArchetypes[id]][id]
+	local entity = self:_getEntity(id)
 
-	for metatable, component in pairs(existingComponents) do
+	for metatable, component in pairs(entity) do
 		self:_trackChanged(metatable, id, component, nil)
 	end
 
@@ -251,8 +318,10 @@ end
 	:::
 ]=]
 function World:clear()
+	local firstStorage = {}
+	self._storages = { firstStorage }
+	self._pristineStorage = firstStorage
 	self._entityArchetypes = {}
-	self._archetypes = {}
 	self._entityMetatablesCache = {}
 	self._size = 0
 	self._changedStorage = {}
@@ -280,8 +349,7 @@ function World:get(id, ...)
 		error(ERROR_NO_ENTITY, 2)
 	end
 
-	local archetype = self._entityArchetypes[id]
-	local entity = self._archetypes[archetype][id]
+	local entity = self:_getEntity(id)
 
 	local length = select("#", ...)
 
@@ -477,58 +545,6 @@ end
 	end
 	```
 
-	&nbsp;
-
-	:::danger Modifying the World inside query
-	Adding or removing components to entities that match the query you are currently iterating through isn't safe.
-
-
-	#### **Unsafe operations** while iterating over a query:
-	- Inserting new components or spawning new entities that match the query
-	- Removing components if the resulting entity would still match the query
-
-	:::
-
-
-	#### **Safe operations** while iterating over a query:
-	- Inserting new components or spawning new entities that **don't** match the query
-	- Removing components if the resulting entity **would not** match the query
-	- Updating components that already existed on an entity with new data
-	- Despawning entities that match the query
-
-	If you need to perform an unsafe operation while iterating over a query, consider using [QueryResult:snapshot]:
-
-	```lua
-	for id, enemy in world:query(Enemy):snapshot()
-		-- This is normally unsafe, because an entity with Enemy,Dead would still match our query.
-		-- However, when using `snapshot`, it's okay.
-		world:insert(id, Dead())
-	end
-	```
-
-	[QueryResult:snapshot] creates a list of all of the results of this query at the moment it is called,
-	so changes made while iterating over the result of `QueryResult:snapshot` do not affect future results of the
-	iteration.
-
-	Of course, this comes with a cost: we must allocate a new list and iterate over everything returned from the
-	QueryResult in advance, so using this method is slower than iterating over a QueryResult directly.
-
-	:::caution What's the worst that could happen?
-	Performing the *unsafe operations* listed above could result in the following:
-
-	- Entities being returned multiple times from the query
-	- Other entities being skipped altogether
-
-	As always when writing Lua, the iteration behavior when inserting new elements into a table you are in the middle of
-	iterating over is undefined. This isn't only a concern with Matter.
-
-	Querying over the World iterates through Matter's archetypical storage directly. Because of the way the World works
-	internally, changing the unique set of components an entity has causes it to be moved to another storage location.
-	Because we are iterating over all storage locations that match our query, it's possible modifying an entity will
-	move it to a storage location that the query hasn't yet reached. If this happens, you will end up seeing the same
-	entity multiple times from a query.
-	:::
-
 	@param ... Component -- The component types to query. Only entities with *all* of these components will be returned.
 	@return QueryResult -- See [QueryResult](/api/QueryResult) docs.
 ]=]
@@ -571,22 +587,54 @@ function World:query(...)
 		return entityId, unpack(queryOutput, 1, queryLength)
 	end
 
-	local compatibleArchetype = next(compatibleArchetypes)
+	local currentCompatibleArchetype = next(compatibleArchetypes)
 	local lastEntityId
+	local storageIndex = 1
+
+	if self._pristineStorage == self._storages[1] then
+		self:_markStorageDirty()
+	end
+
+	local seenEntities = {}
+
 	local function nextItem()
-		local entityId, entityData = next(self._archetypes[compatibleArchetype], lastEntityId)
+		local entityId, entityData
 
-		while entityId == nil do
-			compatibleArchetype = next(compatibleArchetypes, compatibleArchetype)
-
-			if compatibleArchetype == nil then
-				return
+		repeat
+			if self._storages[storageIndex][currentCompatibleArchetype] then
+				entityId, entityData = next(self._storages[storageIndex][currentCompatibleArchetype], lastEntityId)
 			end
 
-			entityId, entityData = next(self._archetypes[compatibleArchetype])
-		end
-		lastEntityId = entityId
+			while entityId == nil do
+				currentCompatibleArchetype = next(compatibleArchetypes, currentCompatibleArchetype)
 
+				if currentCompatibleArchetype == nil then
+					storageIndex += 1
+
+					local nextStorage = self._storages[storageIndex]
+
+					if nextStorage == nil or next(nextStorage) == nil then
+						return
+					end
+
+					currentCompatibleArchetype = nil
+
+					if self._pristineStorage == nextStorage then
+						self:_markStorageDirty()
+					end
+
+					continue
+				elseif self._storages[storageIndex][currentCompatibleArchetype] == nil then
+					continue
+				end
+
+				entityId, entityData = next(self._storages[storageIndex][currentCompatibleArchetype])
+			end
+			lastEntityId = entityId
+
+		until seenEntities[entityId] == nil
+
+		seenEntities[entityId] = true
 		return entityId, entityData
 	end
 
@@ -594,6 +642,22 @@ function World:query(...)
 		_expand = expand,
 		_next = nextItem,
 	}, QueryResult)
+end
+
+local function cleanupQueryChanged(hookState)
+	local world = hookState.world
+	local componentToTrack = hookState.componentToTrack
+
+	for index, object in world._changedStorage[componentToTrack] do
+		if object == hookState.storage then
+			table.remove(world._changedStorage[componentToTrack], index)
+			break
+		end
+	end
+
+	if next(world._changedStorage[componentToTrack]) == nil then
+		world._changedStorage[componentToTrack] = nil
+	end
 end
 
 --[=[
@@ -624,9 +688,10 @@ end
 	Calling this function from your system creates storage internally for your system. Then, changes meeting your
 	criteria are pushed into your storage. Calling `queryChanged` again each frame drains this storage.
 
-	If you do not call `queryChanged` each frame, or your system isn't called every frame, the storage will continually
-	fill up and does not empty unless you drain it. It is assumed that you will call `queryChanged` unconditionally,
-	every frame, **until the end of time**.
+	If your system isn't called every frame, the storage will continually fill up and does not empty unless you drain
+	it.
+
+	If you stop calling `queryChanged` in your system, changes will stop being tracked.
 	:::
 
 	### Returns
@@ -647,8 +712,8 @@ end
 	cannot be modified.
 
 	```lua
-	for id, modelRecord, enemy in world:queryChanged(Model, Enemy) do
-		if modelRecord.new == nil then
+	for id, record in world:queryChanged(Model) do
+		if record.new == nil then
 			-- Model was removed
 
 			if enemy.type == "this is a made up example" then
@@ -658,14 +723,6 @@ end
 	end
 	```
 
-	&nbsp;
-
-	:::info
-	It's conventional to end the name you assign the record with "-Record", to make clear it is a different shape than
-	a regular component instance. The ChangeValue is a table with `new` and `old` fields, but additional returns for the
-	additional query arguments are regular component instances.
-	:::
-
 	@param componentToTrack Component -- The component you want to listen to changes for.
 	@return () -> (id, ChangeRecord) -- Iterator of entity ID and change record
 ]=]
@@ -674,7 +731,7 @@ function World:queryChanged(componentToTrack, ...: nil)
 		error("World:queryChanged does not take any additional parameters", 2)
 	end
 
-	local hookState = topoRuntime.useHookState(componentToTrack)
+	local hookState = topoRuntime.useHookState(componentToTrack, cleanupQueryChanged)
 
 	if not hookState.storage then
 		if not self._changedStorage[componentToTrack] then
@@ -683,6 +740,8 @@ function World:queryChanged(componentToTrack, ...: nil)
 
 		local storage = {}
 		hookState.storage = storage
+		hookState.world = self
+		hookState.componentToTrack = componentToTrack
 
 		table.insert(self._changedStorage[componentToTrack], storage)
 	end
@@ -750,7 +809,7 @@ function World:insert(id, ...)
 		error(ERROR_NO_ENTITY, 2)
 	end
 
-	local existingComponents = self._archetypes[self._entityArchetypes[id]][id]
+	local entity = self:_getEntity(id)
 
 	local wasNew = false
 	for i = 1, select("#", ...) do
@@ -760,7 +819,7 @@ function World:insert(id, ...)
 
 		local metatable = getmetatable(newComponent)
 
-		local oldComponent = existingComponents[metatable]
+		local oldComponent = entity[metatable]
 
 		if not oldComponent then
 			wasNew = true
@@ -770,11 +829,11 @@ function World:insert(id, ...)
 
 		self:_trackChanged(metatable, id, oldComponent, newComponent)
 
-		existingComponents[metatable] = newComponent
+		entity[metatable] = newComponent
 	end
 
 	if wasNew then -- wasNew
-		self:_transitionArchetype(id, existingComponents)
+		self:_transitionArchetype(id, entity)
 	end
 
 	debug.profileend()
@@ -796,7 +855,7 @@ function World:remove(id, ...)
 		error(ERROR_NO_ENTITY, 2)
 	end
 
-	local existingComponents = self._archetypes[self._entityArchetypes[id]][id]
+	local entity = self:_getEntity(id)
 
 	local length = select("#", ...)
 	local removed = {}
@@ -806,25 +865,25 @@ function World:remove(id, ...)
 
 		assertValidComponent(metatable, i)
 
-		local oldComponent = existingComponents[metatable]
+		local oldComponent = entity[metatable]
 
 		removed[i] = oldComponent
 
 		self:_trackChanged(metatable, id, oldComponent, nil)
 
-		existingComponents[metatable] = nil
+		entity[metatable] = nil
 	end
 
 	-- Rebuild entity metatable cache
 	local metatables = {}
 
-	for metatable in pairs(existingComponents) do
+	for metatable in pairs(entity) do
 		table.insert(metatables, metatable)
 	end
 
 	self._entityMetatablesCache[id] = metatables
 
-	self:_transitionArchetype(id, existingComponents)
+	self:_transitionArchetype(id, entity)
 
 	return unpack(removed, 1, length)
 end
@@ -834,6 +893,48 @@ end
 ]=]
 function World:size()
 	return self._size
+end
+
+--[=[
+	:::tip
+	[Loop] automatically calls this function on your World(s), so there is no need to call it yourself if you're using
+	a Loop.
+	:::
+
+	If you are not using a Loop, you should call this function at a regular interval (i.e., once per frame) to optimize
+	the internal storage for queries.
+
+	This is part of a strategy to eliminate iterator invalidation when modifying the World while inside a query from
+	[World:query]. While inside a query, any changes to the World are stored in a separate location from the rest of
+	the World. Calling this function combines the separate storage back into the main storage, which speeds things up
+	again.
+]=]
+function World:optimizeQueries()
+	if #self._storages == 1 then
+		return
+	end
+
+	local firstStorage = self._storages[1]
+
+	for i = 2, #self._storages do
+		local storage = self._storages[i]
+
+		for archetype, entities in storage do
+			if firstStorage[archetype] == nil then
+				firstStorage[archetype] = entities
+			else
+				for entityId, entityData in entities do
+					if firstStorage[archetype][entityId] then
+						error("Entity ID already exists in first storage...")
+					end
+					firstStorage[archetype][entityId] = entityData
+				end
+			end
+		end
+	end
+
+	self._storages = { firstStorage }
+	self._pristineStorage = firstStorage
 end
 
 return World

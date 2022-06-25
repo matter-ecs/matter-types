@@ -1,6 +1,7 @@
-llocal World = require(script.Parent.World)
+local World = require(script.Parent.World)
 local Loop = require(script.Parent.Loop)
 local component = require(script.Parent).component
+local BindableEvent = require(script.Parent.mock.BindableEvent)
 
 local function deepEquals(a, b)
 	if type(a) ~= "table" or type(b) ~= "table" then
@@ -98,6 +99,10 @@ return function()
 
 			local A = component()
 			local id = world:spawnAt(5, A())
+
+			expect(function()
+				world:spawnAt(5, A())
+			end).to.throw()
 
 			expect(id).to.equal(5)
 
@@ -337,8 +342,8 @@ return function()
 				event = "infrequent",
 			})
 
-			local defaultBindable = Instance.new("BindableEvent")
-			local infrequentBindable = Instance.new("BindableEvent")
+			local defaultBindable = BindableEvent.new()
+			local infrequentBindable = BindableEvent.new()
 
 			loop:begin({ default = defaultBindable.Event, infrequent = infrequentBindable.Event })
 
@@ -459,6 +464,25 @@ return function()
 			else
 				expect(snapshot[2][1]).to.equal(1)
 			end
+		end)
+
+		it("should not invalidate iterators", function()
+			local world = World.new()
+			local A = component()
+			local B = component()
+			local C = component()
+
+			for _ = 1, 10 do
+				world:spawn(A(), B())
+			end
+
+			local count = 0
+			for id in world:query(A) do
+				count += 1
+				world:insert(id, C())
+				world:remove(id, B)
+			end
+			expect(count).to.equal(10)
 		end)
 	end)
 end

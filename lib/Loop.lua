@@ -1,4 +1,4 @@
-llocal topoRuntime = require(script.Parent.topoRuntime)
+local topoRuntime = require(script.Parent.topoRuntime)
 
 local recentErrors = {}
 local recentErrorLastTime = 0
@@ -169,18 +169,28 @@ end
 	Replaces an older version of a system with a newer version of the system. Internal system storage (which is used
 	by hooks) will be moved to be associated with the new system. This is intended to be used for hot reloading.
 
-	@param before System
-	@param after System
+	@param old System
+	@param new System
 ]=]
-function Loop:replaceSystem(before: System, after: System)
-	if not self._systems[before] then
+function Loop:replaceSystem(old: System, new: System)
+	if not self._systems[old] then
 		error("Before system does not exist!")
 	end
 
-	self._systems[after] = after
-	self._systems[before] = nil
-	self._systemState[after] = self._systemState[before] or {}
-	self._systemState[before] = nil
+	self._systems[new] = new
+	self._systems[old] = nil
+	self._systemState[new] = self._systemState[old] or {}
+	self._systemState[old] = nil
+
+	for system in self._systems do
+		if type(system) == "table" and system.after then
+			local index = table.find(system.after, old)
+
+			if index then
+				system.after[index] = new
+			end
+		end
+	end
 
 	self:_sortSystems()
 end
@@ -319,12 +329,15 @@ function Loop:begin(events)
 
 			generation = not generation
 
+			local dirtyWorlds = {}
+
 			for _, system in ipairs(self._orderedSystemsByEvent[eventName]) do
 				topoRuntime.start({
 					system = self._systemState[system],
 					frame = {
 						generation = generation,
 						deltaTime = deltaTime,
+						dirtyWorlds = dirtyWorlds,
 					},
 				}, function()
 					local fn = systemFn(system)
@@ -345,6 +358,11 @@ function Loop:begin(events)
 							):format(systemName(system))
 						)
 					end
+
+					for world in dirtyWorlds do
+						world:optimizeQueries()
+					end
+					table.clear(dirtyWorlds)
 
 					if not success then
 						if os.clock() - recentErrorLastTime > 10 then

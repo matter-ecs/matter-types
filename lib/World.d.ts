@@ -97,6 +97,8 @@ export class World {
 	public remove<T extends DynamicBundle>(id: AnyEntity, ...dynamic_bundle: T): T;
 
 	public size(): number
+
+	public optimizeQueries(): void
 }
 
 export type Iterate<A extends ComponentBundle> = A extends []
