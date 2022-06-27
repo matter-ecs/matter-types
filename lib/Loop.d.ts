@@ -101,6 +101,21 @@ export class Loop<T extends Array<unknown>> {
 	public scheduleSystem(system: System<T>): void;
 
 	/**
+	 * Schedules a single system. This is an expensive function to call multiple times. Instead, try batch scheduling
+	 * systems with [Loop:scheduleSystems] if possible.
+	 * @param system - System to evict from loop.
+	 */
+	public evictSystem(system: System<T>): void
+
+	/**
+	 * Replaces an older version of a system with a newer version of the system. Internal system storage (which is used
+	 * by hooks) will be moved to be associated with the new system. This is intended to be used for hot reloading.
+	 * @param oldSystem - The old system to be replaced.
+	 * @param newSystem - The new system to replace with.
+	 */
+	public replaceSystem(oldSystem: System<T>, newSystem: System<T>): void
+
+	/**
 	 *
 	 * Connects to frame events and starts invoking your systems.
 	 *
