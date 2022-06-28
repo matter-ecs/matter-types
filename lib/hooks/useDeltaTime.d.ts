@@ -1,2 +1,2 @@
-function useDeltaTime(): number;
+declare function useDeltaTime(): number;
 export = useDeltaTime
