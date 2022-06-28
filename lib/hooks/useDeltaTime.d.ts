@@ -1,2 +1,1 @@
-declare function useDeltaTime(): number;
-export = useDeltaTime
+export function useDeltaTime(): number;
