@@ -1,7 +1,7 @@
 import { AnyComponent, Component, newComponent, InferComponents, GenericOfComponent} from "./component";
 import { useThrottle } from "./hooks/useThrottle";
 import { useEvent } from "./hooks/useEvent"
-import { useDeltaTime } from "./hooks/useDeltaTime"; 
+import useDeltaTime from "./hooks/useDeltaTime"; 
 import { Loop } from "./Loop";
 import { None, merge } from "./immutable";
 import { useHookState } from "./topoRuntime";
