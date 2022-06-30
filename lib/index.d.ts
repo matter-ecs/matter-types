@@ -2,7 +2,7 @@ import { AnyComponent, Component, newComponent, InferComponents, GenericOfCompon
 import { useThrottle } from "./hooks/useThrottle";
 import { useEvent } from "./hooks/useEvent"
 import { useDeltaTime } from "./hooks/useDeltaTime"; 
-import { Loop } from "./Loop";
+import { Loop, AnySystem, System, SystemFn, SystemStruct } from "./Loop";
 import { None, merge } from "./immutable";
 import { useCurrentSystem, useHookState } from "./topoRuntime";
 import { AnyEntity, Entity, World , Iterate } from "./World";
@@ -26,4 +26,17 @@ export {
     Debugger
 };
 
-export type { Entity, AnyEntity, Component, AnyComponent, InferComponents, GenericOfComponent, Iterate, HookWidgets };
+export type { 
+    Entity, 
+    AnyEntity, 
+    Component, 
+    AnyComponent, 
+    InferComponents, 
+    GenericOfComponent, 
+    Iterate, 
+    HookWidgets, 
+    System, 
+    SystemFn, 
+    SystemStruct, 
+    AnySystem 
+};
