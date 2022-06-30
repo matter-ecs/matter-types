@@ -1,3 +1,4 @@
+local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 local Plasma = TS.import(script, TS.getModule(script, "@rbxts", "plasma").out)
 local create = Plasma.create
 

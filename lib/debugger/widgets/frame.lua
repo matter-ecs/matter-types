@@ -1,4 +1,4 @@
-local TS = _G[script]
+local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("RuntimeLib"))
 local Plasma = TS.import(script, TS.getModule(script, "@rbxts", "plasma").out)
 
 return Plasma.widget(function()
