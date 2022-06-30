@@ -34,7 +34,7 @@ export type {
     InferComponents, 
     GenericOfComponent, 
     Iterate, 
-    HookWidgets, 
+    HookWidgets as DebugWidgets, 
     System, 
     SystemFn, 
     SystemStruct, 
