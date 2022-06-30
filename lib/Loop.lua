@@ -55,6 +55,7 @@ Loop.__index = Loop
 function Loop.new(...)
 	return setmetatable({
 		_systems = {},
+		_skipSystems = {},
 		_orderedSystemsByEvent = {},
 		_state = { ... },
 		_stateLength = select("#", ...),
@@ -181,6 +182,11 @@ function Loop:replaceSystem(old: System, new: System)
 	self._systems[old] = nil
 	self._systemState[new] = self._systemState[old] or {}
 	self._systemState[old] = nil
+
+	if self._skipSystems[old] then
+		self._skipSystems[old] = nil
+		self._skipSystems[new] = true
+	end
 
 	for system in self._systems do
 		if type(system) == "table" and system.after then
@@ -339,7 +345,12 @@ function Loop:begin(events)
 						deltaTime = deltaTime,
 						dirtyWorlds = dirtyWorlds,
 					},
+					currentSystem = system,
 				}, function()
+					if self._skipSystems[system] then
+						return
+					end
+
 					local fn = systemFn(system)
 					debug.profilebegin("system: " .. systemName(system))
 
@@ -389,7 +400,7 @@ function Loop:begin(events)
 		end
 
 		for _, middleware in ipairs(self._middlewares) do
-			stepSystems = middleware(stepSystems)
+			stepSystems = middleware(stepSystems, eventName)
 
 			if type(stepSystems) ~= "function" then
 				error(
@@ -429,7 +440,7 @@ end
 	Middleware added later "wraps" middleware that was added earlier. The innermost middleware function is the internal
 	function that actually calls your systems.
 	:::
-	@param middleware (nextFn: () -> ()) -> () -> ()
+	@param middleware (nextFn: () -> (), eventName: string) -> () -> ()
 ]=]
 function Loop:addMiddleware(middleware: (nextFn: () -> ()) -> () -> ())
 	table.insert(self._middlewares, middleware)

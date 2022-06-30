@@ -1,9 +1,10 @@
 type SystemFn <T extends Array<unknown>> = (...params: T) => void
 
-type SystemStruct<T extends Array<unknown>> = { system: SystemFn<T>, event?: string, priority?: number, after?: Array<SystemFn<T> | SystemStruct<T>>}
+export type SystemStruct<T extends Array<unknown>> = { system: SystemFn<T>, event?: string, priority?: number, after?: Array<SystemFn<T> | SystemStruct<T>>}
 
-type System<T extends Array<unknown>> = SystemFn<T> | SystemStruct<T>
+export type System<T extends Array<unknown>> = SystemFn<T> | SystemStruct<T>
 
+export type AnySystem = SystemFn<Array<unknown>> & SystemStruct<Array<unknown>>
 /**
  * @class Loop
  * 

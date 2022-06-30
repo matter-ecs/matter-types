@@ -4,20 +4,26 @@ import { useEvent } from "./hooks/useEvent"
 import { useDeltaTime } from "./hooks/useDeltaTime"; 
 import { Loop } from "./Loop";
 import { None, merge } from "./immutable";
-import { useHookState } from "./topoRuntime";
+import { useCurrentSystem, useHookState } from "./topoRuntime";
 import { AnyEntity, Entity, World , Iterate } from "./World";
-
+import Debugger from "./debugger/debugger"
+import { HookWidgets } from "debugger/hookWidgets";
 export { 
     World, 
-    newComponent as component, 
     Loop, 
+
+    newComponent as component, 
+
     useEvent, 
     useDeltaTime, 
     useThrottle, 
     useHookState, 
+    useCurrentSystem,
 
     merge,
     None,
+
+    Debugger
 };
 
-export type { Entity, AnyEntity, Component, AnyComponent, InferComponents, GenericOfComponent, Iterate};
+export type { Entity, AnyEntity, Component, AnyComponent, InferComponents, GenericOfComponent, Iterate, HookWidgets };

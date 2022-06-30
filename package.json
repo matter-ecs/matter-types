@@ -27,6 +27,7 @@
   "devDependencies": {
     "@rbxts/compiler-types": "^1.2.7-types.1",
     "@rbxts/llama": "^1.1.0-ts2",
+    "@rbxts/plasma": "^0.1.0-ts.12",
     "@rbxts/types": "^1.0.558",
     "@typescript-eslint/eslint-plugin": "^5.8.0",
     "@typescript-eslint/parser": "^5.8.0",
