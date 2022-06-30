@@ -2,12 +2,12 @@ import { PatchOverride } from "@rbxts/plasma/out/Style"
 import { Widgets } from "@rbxts/plasma/out/widgets"
 
 export type HookWidgets = PatchOverride<Widgets, {
-        checkbox: {
+        checkbox: () => {
             clicked(): boolean
             checked(): boolean
         },
-        button: {
+        button: () => {
             clicked(): boolean
         },
-        slider: number
+        slider: (n: number) => number
     }>
