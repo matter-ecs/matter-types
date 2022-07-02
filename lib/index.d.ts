@@ -7,7 +7,7 @@ import { None, merge } from "./immutable";
 import { useCurrentSystem, useHookState } from "./topoRuntime";
 import { AnyEntity, Entity, World , Iterate } from "./World";
 import Debugger from "./debugger/debugger"
-import { HookWidgets } from "debugger/hookWidgets";
+import { HookWidgets } from "./debugger/hookWidgets";
 export { 
     World, 
     Loop, 
