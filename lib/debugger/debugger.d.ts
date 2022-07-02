@@ -1,9 +1,11 @@
-import { AnySystem, Loop } from "Loop";
+import { AnySystem, Loop } from "../Loop";
 
 import Plasma from "@rbxts/plasma"
 import { HookWidgets } from "./hookWidgets";
 
 declare class Debugger {
+    public enabled: boolean;
+    
     public constructor(plasma: typeof Plasma)
 
     public show(): void
