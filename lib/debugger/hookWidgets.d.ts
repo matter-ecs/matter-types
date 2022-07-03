@@ -1,5 +1,5 @@
+import { Widgets } from "@rbxts/plasma";
 import { PatchOverride } from "@rbxts/plasma/out/Style";
-import { Widgets } from "@rbxts/plasma/out/widgets";
 
 export type HookWidgets = PatchOverride<
 	Widgets,
