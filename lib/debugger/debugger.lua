@@ -4,20 +4,23 @@ local Players = game:GetService("Players")
 
 local hookWidgets = require(script.Parent.hookWidgets)
 local EventBridge = require(script.Parent.EventBridge)
+local ui = require(script.Parent.ui)
 
 local customWidgetConstructors = {
 	panel = require(script.Parent.widgets.panel),
 	selectionList = require(script.Parent.widgets.selectionList),
 	container = require(script.Parent.widgets.container),
 	frame = require(script.Parent.widgets.frame),
+	link = require(script.Parent.widgets.link),
 }
 
 local remoteEvent
 
-local function systemName(system)
-	local systemFn = if type(system) == "table" then system.system else system
-
-	return debug.info(systemFn, "n")
+-- Assert plasma is compatible via feature detection
+local function assertCompatiblePlasma(plasma)
+	if not plasma.hydrateAutomaticSize then
+		error("Plasma passed to Matter debugger is out of date, please update it to use the debugger.")
+	end
 end
 
 --[=[
@@ -70,6 +73,8 @@ Debugger.__index = Debugger
 	@return Debugger
 ]=]
 function Debugger.new(plasma)
+	assertCompatiblePlasma(plasma)
+
 	if not remoteEvent then
 		if RunService:IsServer() then
 			remoteEvent = Instance.new("RemoteEvent")
@@ -252,7 +257,7 @@ function Debugger:autoInitialize(loop)
 			if eventName == self._eventOrder[1] then
 				self._continueHandle = self.plasma.beginFrame(plasmaNode, function()
 					self.plasma.setEventCallback(function(...)
-						self._eventBridge:connect(...)
+						return self._eventBridge:connect(...)
 					end)
 
 					self:draw(loop)
@@ -274,6 +279,10 @@ function Debugger:autoInitialize(loop)
 			end
 		end
 	end)
+
+	if RunService:IsClient() then
+		self.plasma.hydrateAutomaticSize()
+	end
 end
 
 --[=[
@@ -341,89 +350,7 @@ end
 	@param loop Loop
 ]=]
 function Debugger:draw(loop)
-	local plasma = self.plasma
-	local ui = self._customWidgets
-
-	ui.container(function()
-		if self:_isServerView() then
-			ui.panel(function()
-				if plasma.button("switch to client"):clicked() then
-					self:switchToClientView()
-				end
-			end, {
-				fullHeight = false,
-			})
-			return
-		end
-
-		ui.panel(function()
-			if RunService:IsClient() then
-				if plasma.button("switch to server"):clicked() then
-					self:switchToServerView()
-				end
-			end
-
-			plasma.space(30)
-
-			plasma.heading("SYSTEMS", 1)
-			plasma.space(30)
-
-			for _, eventName in self._eventOrder do
-				local systems = loop._orderedSystemsByEvent[eventName]
-
-				if not systems then
-					continue
-				end
-
-				plasma.heading(eventName)
-				plasma.space(10)
-				local items = {}
-
-				for _, system in systems do
-					table.insert(items, {
-						text = systemName(system),
-						selected = self.debugSystem == system,
-						system = system,
-					})
-				end
-
-				local selected = ui.selectionList(items):selected()
-
-				if selected then
-					if selected.system == self.debugSystem then
-						self.debugSystem = nil
-					else
-						self.debugSystem = selected.system
-					end
-				end
-
-				plasma.space(50)
-			end
-		end)
-
-		if self.debugSystem then
-			plasma.window("System config", function()
-				plasma.useKey(systemName(self.debugSystem))
-				plasma.heading(systemName(self.debugSystem))
-				plasma.space(0)
-
-				local currentlyDisabled = loop._skipSystems[self.debugSystem]
-
-				if plasma.checkbox("Disable system", {
-					checked = currentlyDisabled,
-				}):clicked() then
-					loop._skipSystems[self.debugSystem] = not currentlyDisabled
-				end
-			end)
-		end
-
-		self.parent = ui.container(function()
-			self.frame = ui.frame()
-		end)
-	end, {
-		direction = Enum.FillDirection.Horizontal,
-		marginTop = if RunService:IsServer() then 80 else 0,
-	})
+	ui(self, loop)
 end
 
 --[=[

@@ -1,34 +1,34 @@
 import { AnySystem, Loop } from "../Loop";
 
-import Plasma from "@rbxts/plasma"
+import Plasma from "@rbxts/plasma";
 import { HookWidgets } from "./hookWidgets";
 
 declare class Debugger {
-    public enabled: boolean;
-    
-    public constructor(plasma: typeof Plasma)
+	public enabled: boolean;
 
-    public show(): void
+	public constructor(plasma: typeof Plasma);
 
-    public hide(): void
+	public show(): void;
 
-    public toggle(): void
+	public hide(): void;
 
-    public connectPlayer(): void
+	public toggle(): void;
 
-    public disconnectPlayer(): void
+	public connectPlayer(): void;
 
-    public autoInitialize(loop: Loop<Array<unknown>>): void
+	public disconnectPlayer(): void;
 
-    public replaceSystem(oldSystem: AnySystem, newSystem: AnySystem): void
+	public autoInitialize(loop: Loop<Array<unknown>>): void;
 
-    public switchToServerView(): void
+	public replaceSystem(oldSystem: AnySystem, newSystem: AnySystem): void;
 
-    public switchToClientView(): void
+	public switchToServerView(): void;
 
-    public draw<T extends Array<unknown>>(loop: Loop<T>): void
+	public switchToClientView(): void;
 
-    public getWidgets(): HookWidgets
+	public draw<T extends Array<unknown>>(loop: Loop<T>): void;
+
+	public getWidgets(): HookWidgets;
 }
 
-export = Debugger
+export = Debugger;

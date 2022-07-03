@@ -1,4 +1,4 @@
-import { None, NoneIfy } from "./immutable";
+import { None } from "./immutable";
 
 export type AnyComponent = Component<object>;
 export type ComponentCtor = () => AnyComponent;
@@ -9,18 +9,18 @@ type Id<T> = T;
 
 type PatchOverride<Base, Overrides> = Id<{
 	[K in keyof Base | keyof Overrides]: K extends keyof Overrides
-		? Overrides[K] 
+		? Overrides[K]
 		: K extends keyof Base
-		? Base[K] 
+		? Base[K]
 		: never;
-}>
+}>;
 
-type OptionalKeys<T> = { [K in keyof T]: T[K] | None }
-type RemoveNoneKeys<T extends object> = { [K in keyof T]: T[K] extends None ? "a" : K }
+type OptionalKeys<T> = { [K in keyof T]: T[K] | None };
+type RemoveNoneKeys<T extends object> = { [K in keyof T]: T[K] extends None ? "a" : K };
 
 export type Component<T extends object> = { readonly [K in keyof T]: T[K] } & {
 	patch<U extends OptionalKeys<Partial<T>>>(data: U): Component<ExcludeMembers<PatchOverride<T, U>, None>>;
-}
+};
 
 export type GenericOfComponent<T> = T extends Component<infer A> ? A : never;
 
@@ -44,11 +44,11 @@ export type NullableComponents<a extends ComponentBundle> = a extends []
 			? [F | undefined, ...NullableComponents<B>]
 			: never
 		: never
-	: never
+	: never;
 
 export function newComponent<T extends object>(
 	name?: string,
-	defaultData?: T
+	defaultData?: T,
 ): {
 	(data?: T): Component<T>;
 };

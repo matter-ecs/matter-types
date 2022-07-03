@@ -1,13 +1,18 @@
-type SystemFn <T extends Array<unknown>> = (...params: T) => void
+type SystemFn<T extends Array<unknown>> = (...params: T) => void;
 
-export type SystemStruct<T extends Array<unknown>> = { system: SystemFn<T>, event?: string, priority?: number, after?: Array<SystemFn<T> | SystemStruct<T>>}
+export type SystemStruct<T extends Array<unknown>> = {
+	system: SystemFn<T>;
+	event?: string;
+	priority?: number;
+	after?: Array<SystemFn<T> | SystemStruct<T>>;
+};
 
-export type System<T extends Array<unknown>> = SystemFn<T> | SystemStruct<T>
+export type System<T extends Array<unknown>> = SystemFn<T> | SystemStruct<T>;
 
-export type AnySystem = SystemFn<Array<unknown>> & SystemStruct<Array<unknown>>
+export type AnySystem = SystemFn<Array<unknown>> & SystemStruct<Array<unknown>>;
 /**
  * @class Loop
- * 
+ *
  * The Loop class handles scheduling and *looping* (who would have guessed) over all of your game systems.
  *
  * Yielding is not allowed in systems. Doing so will result in the system thread being closed early, but it will not
@@ -106,7 +111,7 @@ export class Loop<T extends Array<unknown>> {
 	 * systems with [Loop:scheduleSystems] if possible.
 	 * @param system - System to evict from loop.
 	 */
-	public evictSystem(system: System<T>): void
+	public evictSystem(system: System<T>): void;
 
 	/**
 	 * Replaces an older version of a system with a newer version of the system. Internal system storage (which is used
@@ -114,7 +119,7 @@ export class Loop<T extends Array<unknown>> {
 	 * @param oldSystem - The old system to be replaced.
 	 * @param newSystem - The new system to replace with.
 	 */
-	public replaceSystem(oldSystem: System<T>, newSystem: System<T>): void
+	public replaceSystem(oldSystem: System<T>, newSystem: System<T>): void;
 
 	/**
 	 *

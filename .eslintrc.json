@@ -1,68 +1,29 @@
-<<<<<<< HEAD
 {
-	"parser": "@typescript-eslint/parser",
-	"parserOptions": {
-		"jsx": true,
-		"useJSXTextNode": true,
-		"ecmaVersion": 2018,
-		"sourceType": "module",
-		"project": "./tsconfig.json"
-	},
-	"plugins": [
-		"@typescript-eslint",
-		"roblox-ts",
-		"prettier"
-	],
-	"extends": [
-		"plugin:@typescript-eslint/recommended",
-		"plugin:roblox-ts/recommended",
-		"plugin:prettier/recommended"
-	],
-	"rules": {
-		"prettier/prettier": [
-			"warn",
-			{
-				"semi": true,
-				"trailingComma": "all",
-				"singleQuote": false,
-				"printWidth": 120,
-				"tabWidth": 4,
-				"useTabs": true
-			}
-		]
-	}
-=======
-{
-	"parser": "@typescript-eslint/parser",
-	"parserOptions": {
-		"jsx": true,
-		"useJSXTextNode": true,
-		"ecmaVersion": 2018,
-		"sourceType": "module",
-		"project": "./tsconfig.json"
-	},
-	"plugins": [
-		"@typescript-eslint",
-		"roblox-ts",
-		"prettier"
-	],
-	"extends": [
-		"plugin:@typescript-eslint/recommended",
-		"plugin:roblox-ts/recommended",
-		"plugin:prettier/recommended"
-	],
-	"rules": {
-		"prettier/prettier": [
-			"warn",
-			{
-				"semi": true,
-				"trailingComma": "all",
-				"singleQuote": false,
-				"printWidth": 120,
-				"tabWidth": 4,
-				"useTabs": true
-			}
-		]
-	}
->>>>>>> 16b6883d1f5d8d0723e35421540e548334398101
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "jsx": true,
+    "useJSXTextNode": true,
+    "ecmaVersion": 2018,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["@typescript-eslint", "roblox-ts", "prettier"],
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "plugin:roblox-ts/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "rules": {
+    "prettier/prettier": [
+      "warn",
+      {
+        "semi": true,
+        "trailingComma": "all",
+        "singleQuote": false,
+        "printWidth": 120,
+        "tabWidth": 4,
+        "useTabs": true
+      }
+    ]
+  }
 }

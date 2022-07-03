@@ -1,19 +1,23 @@
 return function(Plasma)
 	local create = Plasma.create
 
-	local Item = Plasma.widget(function(text, selected, icon)
+	return Plasma.widget(function(text, options)
+		options = options or {}
+
 		local clicked, setClicked = Plasma.useState(false)
 		local style = Plasma.useStyle()
 
 		local refs = Plasma.useInstance(function(ref)
+			local colorHover = style.textColor
+
+			local darker = colorHover.R * 255 * 0.8 -- 20% darker
+			local color = Color3.fromRGB(darker, darker, darker)
+
 			local button = create("TextButton", {
 				[ref] = "button",
-				Size = UDim2.new(1, 0, 0, 40),
+				BackgroundTransparency = 1,
 				Text = "",
-
-				create("UICorner", {
-					CornerRadius = UDim.new(0, 8),
-				}),
+				Size = UDim2.new(0, 0, 0, 40),
 
 				create("UIPadding", {
 					PaddingBottom = UDim.new(0, 0),
@@ -31,7 +35,7 @@ return function(Plasma)
 					Name = "Icon",
 					BackgroundTransparency = 1,
 					Size = UDim2.new(0, 30, 1, 0),
-					Text = icon,
+					Text = options.icon,
 					TextXAlignment = Enum.TextXAlignment.Left,
 					TextSize = 23,
 					TextColor3 = style.textColor,
@@ -39,32 +43,51 @@ return function(Plasma)
 				}),
 
 				create("TextLabel", {
+					[ref] = "mainText",
+					Name = "MainText",
 					BackgroundTransparency = 1,
-					AutomaticSize = Enum.AutomaticSize.X,
 					Size = UDim2.new(0, 0, 1, 0),
 					Text = text,
 					TextXAlignment = Enum.TextXAlignment.Left,
+					TextColor3 = color,
 					TextSize = 19,
-					TextColor3 = style.textColor,
-					Font = Enum.Font.SourceSans,
 				}),
 
 				Activated = function()
+					if options.disabled then
+						return
+					end
+
 					setClicked(true)
 				end,
+
+				MouseEnter = function()
+					if options.disabled then
+						return
+					end
+
+					ref.button.MainText.TextColor3 = colorHover
+				end,
+
+				MouseLeave = function()
+					ref.button.MainText.TextColor3 = color
+				end,
+			})
+
+			Plasma.automaticSize(button)
+			Plasma.automaticSize(ref.mainText, {
+				axis = Enum.AutomaticSize.X,
 			})
 
 			return button
 		end)
 
-		Plasma.useEffect(function()
-			refs.button.TextLabel.Text = text
-			refs.button.Icon.Text = icon or ""
-		end, text, icon)
+		refs.button.MainText.Text = text
 
-		Plasma.useEffect(function()
-			refs.button.BackgroundColor3 = if selected then Color3.fromHex("bd515c") else style.bg2
-		end, selected)
+		refs.button.Icon.Text = options.icon or ""
+		refs.button.Icon.Visible = not not options.icon
+
+		refs.mainText.Font = options.font or Enum.Font.SourceSans
 
 		return {
 			clicked = function()
@@ -74,39 +97,6 @@ return function(Plasma)
 				end
 
 				return false
-			end,
-		}
-	end)
-
-	return Plasma.widget(function(items)
-		Plasma.useInstance(function()
-			local frame = create("Frame", {
-				BackgroundTransparency = 1,
-				Size = UDim2.new(1, 0, 0, 0),
-
-				create("UIListLayout", {
-					SortOrder = Enum.SortOrder.LayoutOrder,
-				}),
-			})
-
-			Plasma.automaticSize(frame, {
-				axis = Enum.AutomaticSize.Y,
-			})
-
-			return frame
-		end)
-
-		local selected
-
-		for _, item in items do
-			if Item(item.text, item.selected, item.icon):clicked() then
-				selected = item
-			end
-		end
-
-		return {
-			selected = function()
-				return selected
 			end,
 		}
 	end)
