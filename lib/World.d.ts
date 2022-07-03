@@ -12,10 +12,10 @@ export type Entity<T extends ComponentBundle> = number & {
 	/**
 	 * @hidden
 	 */
-	readonly __nominal_entity: T
-}
+	readonly __nominal_entity: T;
+};
 
-export type GenericOfEntity<T> = T extends Entity<infer a> ? a : never
+export type GenericOfEntity<T> = T extends Entity<infer a> ? a : never;
 
 export type AnyEntity = Entity<ComponentBundle>;
 
@@ -30,23 +30,22 @@ type IncludesAll<T extends ReadonlyArray<unknown>, S extends ReadonlyArray<unkno
 	? true
 	: false;
 
-type NullableArray<A extends Array<unknown>> = Partial<A> extends Array<unknown> ? Partial<A> : never
+type NullableArray<A extends Array<unknown>> = Partial<A> extends Array<unknown> ? Partial<A> : never;
 
 /**
  * @class World
- * 
+ *
  * A World contains entities which have components.
  * The World is queryable and can be used to get entities with a specific set of components.
  * Entities are simply ever-increasing integers.
  */
 
-
-type A<T extends ComponentBundle> = { [index in keyof T]: T[index]}
-type a = A<[Component<{foo: "bar"}>]>
+type A<T extends ComponentBundle> = { [index in keyof T]: T[index] };
+type a = A<[Component<{ foo: "bar" }>]>;
 
 export interface World extends IterableFunction<LuaTuple<[AnyEntity, Map<ComponentCtor, AnyComponent>]>> {}
 
-export class World {	
+export class World {
 	public constructor();
 
 	/**
@@ -62,7 +61,7 @@ export class World {
 	 * @param id - The entity ID to spawn with.
 	 * @param component_bundle - The component values to spawn the entity with.
 	 */
-	public spawnAt<T extends ComponentBundle>(id: number, ...component_bundle: T): Entity<T>
+	public spawnAt<T extends ComponentBundle>(id: number, ...component_bundle: T): Entity<T>;
 	/**
 	 * Replaces a given entity by ID with an entirely new set of components.
 	 * Equivalent to removing all components from an entity, and then adding these ones.
@@ -81,24 +80,31 @@ export class World {
 
 	public contains(id: AnyEntity): boolean;
 
-	public get<a extends AnyEntity, T extends ComponentCtor>(entity: a, only: T): Includes<GenericOfEntity<a>, ReturnType<T>> extends true ? 
-		ReturnType<T> 
-		: ReturnType<T> | undefined
+	public get<a extends AnyEntity, T extends ComponentCtor>(
+		entity: a,
+		only: T,
+	): Includes<GenericOfEntity<a>, ReturnType<T>> extends true ? ReturnType<T> : ReturnType<T> | undefined;
 
-	public get<a extends AnyEntity, T extends DynamicBundle>(entity: a, ...bundle: T): 
-		LuaTuple<a extends Entity<InferComponents<T>> ? InferComponents<T> : NullableArray<InferComponents<T>>>
-	
+	public get<a extends AnyEntity, T extends DynamicBundle>(
+		entity: a,
+		...bundle: T
+	): LuaTuple<a extends Entity<InferComponents<T>> ? InferComponents<T> : NullableArray<InferComponents<T>>>;
+
 	public query<T extends DynamicBundle>(...dynamic_bundle: T): QueryResult<InferComponents<T>>;
 
-	public queryChanged<C extends ComponentCtor>(mt: C): IterableFunction<LuaTuple<[Entity<[ReturnType<C>]>, { new: ReturnType<C> | undefined; old: ReturnType<C> | undefined }]>>;
+	public queryChanged<C extends ComponentCtor>(
+		mt: C,
+	): IterableFunction<
+		LuaTuple<[Entity<[ReturnType<C>]>, { new: ReturnType<C> | undefined; old: ReturnType<C> | undefined }]>
+	>;
 
 	public insert(id: AnyEntity, ...dynamic_bundle: ComponentBundle): void;
 
 	public remove<T extends DynamicBundle>(id: AnyEntity, ...dynamic_bundle: T): T;
 
-	public size(): number
+	public size(): number;
 
-	public optimizeQueries(): void
+	public optimizeQueries(): void;
 }
 
 export type Iterate<A extends ComponentBundle> = A extends []
@@ -112,9 +118,9 @@ export type Iterate<A extends ComponentBundle> = A extends []
 	: never;
 
 type QueryResult<T extends ComponentBundle> = IterableFunction<LuaTuple<[Entity<T>, ...T]>> & {
-	without: (this: QueryResult<T>, ...components: DynamicBundle) => QueryResult<T>
-	next: (this: QueryResult<T>) => LuaTuple<[Entity<T>, ...T]>
-	snapshot: (this: QueryResult<T>) => Readonly<T>
+	without: (this: QueryResult<T>, ...components: DynamicBundle) => QueryResult<T>;
+	next: (this: QueryResult<T>) => LuaTuple<[Entity<T>, ...T]>;
+	snapshot: (this: QueryResult<T>) => Readonly<T>;
 };
 
 export type FilterOut<T extends Array<unknown>, F> = T extends [infer L, ...infer R]

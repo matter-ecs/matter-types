@@ -24,9 +24,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {
-    "@rbxts/plasma": "^0.1.0-ts.13"
-  },
   "devDependencies": {
     "@rbxts/compiler-types": "^1.2.7-types.1",
     "@rbxts/types": "^1.0.558",
