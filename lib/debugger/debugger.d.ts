@@ -5,7 +5,7 @@ import { HookWidgets } from "./hookWidgets";
 
 declare class Debugger {
 	public enabled: boolean;
-	public static authorize: (player: Player) => boolean;
+	public static authorize: (fn: (player: Player) => boolean) => void;
 
 	public constructor(plasma: typeof Plasma);
 
