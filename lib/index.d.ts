@@ -7,7 +7,8 @@ import { None, merge } from "./immutable";
 import { useCurrentSystem, useHookState } from "./topoRuntime";
 import { AnyEntity, Entity, World, Iterate } from "./World";
 import Debugger from "./debugger/debugger";
-import { HookWidgets } from "./debugger/hookWidgets";
+import { Widgets } from "@rbxts/plasma";
+
 export {
 	World,
 	Loop,
@@ -30,9 +31,9 @@ export type {
 	InferComponents,
 	GenericOfComponent,
 	Iterate,
-	HookWidgets as DebugWidgets,
 	System,
 	SystemFn,
 	SystemStruct,
 	AnySystem,
+	Widgets as DebugWidgets,
 };
