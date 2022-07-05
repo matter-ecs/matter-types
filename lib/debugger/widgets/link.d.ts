@@ -1,7 +1,16 @@
 import Plasma from "@rbxts/plasma";
 
-declare function link(
-	plasma: typeof Plasma,
-): (text: string, options?: { disabled?: boolean; icon?: string }) => TextButton;
+declare namespace link {
+	interface LinkOptions {
+		disabled?: boolean;
+		icon?: string;
+	}
+
+	interface LinkHandle {
+		clicked(): boolean;
+	}
+}
+
+declare function link(plasma: Plasma): (text: string, options?: link.LinkOptions) => link.LinkHandle;
 
 export = link;

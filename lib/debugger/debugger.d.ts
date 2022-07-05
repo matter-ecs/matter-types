@@ -1,13 +1,12 @@
 import { AnySystem, Loop } from "../Loop";
 
-import Plasma from "@rbxts/plasma";
-import { HookWidgets } from "./hookWidgets";
+import Plasma, { Widgets } from "@rbxts/plasma";
 
 declare class Debugger {
 	public enabled: boolean;
 	public authorize?: (player: Player) => boolean;
 
-	public constructor(plasma: typeof Plasma);
+	public constructor(plasma: Plasma);
 
 	public show(): void;
 
@@ -29,7 +28,7 @@ declare class Debugger {
 
 	public draw<T extends Array<unknown>>(loop: Loop<T>): void;
 
-	public getWidgets(): HookWidgets;
+	public getWidgets(): Widgets;
 }
 
 export = Debugger;

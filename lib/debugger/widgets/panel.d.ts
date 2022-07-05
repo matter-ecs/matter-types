@@ -1,7 +1,10 @@
 import Plasma from "@rbxts/plasma";
 
-declare function panel(
-	plasma: typeof Plasma,
-): (children: () => void, options?: { fullHeight?: boolean }) => LuaTuple<[Frame, ScrollingFrame]>;
+declare namespace panel {
+	interface PanelOptions {
+		fullHeight?: boolean;
+	}
+}
+declare function panel(plasma: Plasma): (children: () => void, options?: panel.PanelOptions) => void;
 
 export = panel;
