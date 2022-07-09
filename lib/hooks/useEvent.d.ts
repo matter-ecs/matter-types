@@ -11,7 +11,19 @@ interface SignalLike {
 	on?(cb: Callback): ConnectionLike;
 }
 
-type InferSignalParameters<S> = S extends SignalLike ? Parameters<Parameters<S["Connect"]>[0]> : never;
+type InferSignalParameters<S> = S extends SignalLike
+	? Parameters<
+			Parameters<
+				S["Connect"] extends Callback
+					? S["Connect"]
+					: S["connect"] extends Callback
+					? S["connect"]
+					: S["on"] extends Callback
+					? S["on"]
+					: never
+			>[0]
+	  >
+	: never;
 
 declare function useEvent<I extends Instance, E extends InstanceEventNames<I>>(
 	instance: I,
