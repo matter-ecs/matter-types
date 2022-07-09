@@ -1,5 +1,14 @@
+interface ConnectionLike {
+	Disconnect?(): void;
+	Destroy?(): void;
+	disconnect?(): void;
+	destroy?(): void;
+}
+
 interface SignalLike {
-	Connect(callback: (...args: Array<unknown>) => void): unknown;
+	Connect?(cb: Callback): ConnectionLike;
+	connect?(cb: Callback): ConnectionLike;
+	on?(cb: Callback): ConnectionLike;
 }
 
 type InferSignalParameters<S> = S extends SignalLike ? Parameters<Parameters<S["Connect"]>[0]> : never;

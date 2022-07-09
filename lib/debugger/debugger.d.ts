@@ -1,6 +1,33 @@
 import { AnySystem, Loop } from "../Loop";
 
 import Plasma, { Widgets } from "@rbxts/plasma";
+import panel from "./widgets/panel";
+import selectionList from "./widgets/selectionList";
+import container from "./widgets/container";
+import frame from "./widgets/frame";
+import link from "./widgets/link";
+import realmSwitch from "./widgets/realmSwitch";
+import tooltip from "./widgets/tooltip";
+import entityInspect from "./widgets/entityInspect";
+import valueInspect from "./widgets/valueInspect";
+import worldInspect from "./widgets/worldInspect";
+import hoverInspect from "./widgets/hoverInspect";
+
+declare namespace Debugger {
+	interface CustomWidgets {
+		panel: typeof panel;
+		selectionList: typeof selectionList;
+		container: typeof container;
+		frame: typeof frame;
+		link: typeof link;
+		realmSwitch: typeof realmSwitch;
+		valueInspect: typeof valueInspect;
+		worldInspect: typeof worldInspect;
+		entityInspect: typeof entityInspect;
+		tooltip: typeof tooltip;
+		hoverInspect: typeof hoverInspect;
+	}
+}
 
 declare class Debugger {
 	public enabled: boolean;

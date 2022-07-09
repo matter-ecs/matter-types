@@ -1,11 +1,13 @@
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 
 local hookWidgets = require(script.Parent.hookWidgets)
+local World = require(script.Parent.Parent.World)
 local EventBridge = require(script.Parent.EventBridge)
 local ui = require(script.Parent.ui)
+local mouseHighlight = require(script.Parent.mouseHighlight)
+local clientBindings = require(script.Parent.clientBindings)
 
 local customWidgetConstructors = {
 	panel = require(script.Parent.widgets.panel),
@@ -13,15 +15,19 @@ local customWidgetConstructors = {
 	container = require(script.Parent.widgets.container),
 	frame = require(script.Parent.widgets.frame),
 	link = require(script.Parent.widgets.link),
-	logo = require(script.Parent.widgets.logo),
 	realmSwitch = require(script.Parent.widgets.realmSwitch),
+	valueInspect = require(script.Parent.widgets.valueInspect),
+	worldInspect = require(script.Parent.widgets.worldInspect),
+	entityInspect = require(script.Parent.widgets.entityInspect),
+	tooltip = require(script.Parent.widgets.tooltip),
+	hoverInspect = require(script.Parent.widgets.hoverInspect),
 }
 
-local remoteEvent
+local remoteEvent, clientBindingConnections
 
 -- Assert plasma is compatible via feature detection
 local function assertCompatiblePlasma(plasma)
-	if not plasma.table then
+	if not plasma.highlight then
 		error("Plasma passed to Matter debugger is out of date, please update it to use the debugger.")
 	end
 end
@@ -63,6 +69,28 @@ Debugger.__index = Debugger
 		if player:GetRankInGroup(372) > 250 then -- etc
 			return true
 		end
+	end
+	```
+]=]
+
+--[=[
+	@prop findInstanceFromEntity (entityId: number) -> Instance?
+	@within Debugger
+
+	Create this property in Debugger to specify a function that will be called to determine what Instance is associated
+	with an entity. This is used for the in-world highlight in the World inspector.
+
+	If not specified, the in-world highlight will not work.
+
+	```lua
+	debugger.findInstanceFromEntity = function(id)
+		if not world:contains(id) then
+			return
+		end
+
+		local model = world:get(id, components.Model)
+
+		return model and model.model or nil
 	end
 	```
 ]=]
@@ -115,34 +143,40 @@ function Debugger.new(plasma)
 	end
 
 	if RunService:IsServer() then
-		remoteEvent.OnServerEvent:Connect(function(player, action, instance, event, ...)
-			if action == "event" then
-				self._eventBridge:fireEventFromPlayer(player, instance, event, ...)
-			elseif action == "start" then
-				if not RunService:IsStudio() then
-					if self.authorize then
-						if not self.authorize(player) then
-							return
-						end
-					else
-						warn("Player attempted to connect to matter debugger but no authorize function is configured.")
-						return
-					end
-				end
-				self:connectPlayer(player)
-			elseif action == "stop" then
-				self:disconnectPlayer(player)
-			end
-		end)
+		self:_connectRemoteEvent()
 	else
-		CollectionService:GetInstanceAddedSignal("MatterDebuggerSwitchToClientView"):Connect(function(instance)
-			instance.Activated:Connect(function()
-				self:switchToClientView()
-			end)
-		end)
+		if not clientBindingConnections then
+			clientBindingConnections = clientBindings(self)
+		end
 	end
 
 	return self
+end
+
+function Debugger:_connectRemoteEvent()
+	remoteEvent.OnServerEvent:Connect(function(player, action, instance, event, ...)
+		if action == "event" then
+			self._eventBridge:fireEventFromPlayer(player, instance, event, ...)
+		elseif action == "start" then
+			if not RunService:IsStudio() then
+				if self.authorize then
+					if not self.authorize(player) then
+						return
+					end
+				else
+					warn("Player attempted to connect to matter debugger but no authorize function is configured.")
+					return
+				end
+			end
+			self:connectPlayer(player)
+		elseif action == "stop" then
+			self:disconnectPlayer(player)
+		elseif action == "inspect" then
+			self.debugEntity = instance
+		elseif action == "hover" then
+			self.hoverEntity = instance
+		end
+	end)
 end
 
 --[=[
@@ -229,6 +263,10 @@ end
 
 	:::tip
 	The debugger must also be shown on a client with [Debugger:show] or [Debugger:toggle] to be used.
+	:::
+						
+	:::caution
+	[Debugger:autoInitialize] should be called before [Loop:begin] to function as expected.
 	:::
 
 	If you also want to use Plasma for more than just the debugger, you can opt to not call this function and instead
@@ -364,7 +402,21 @@ end
 	@param loop Loop
 ]=]
 function Debugger:draw(loop)
+	-- TODO: Find a better way for the user to specify the world.
+	if (self.debugEntity or self.hoverEntity) and not self.debugWorld then
+		for _, object in loop._state do
+			if getmetatable(object) == World then
+				self.debugWorld = object
+				break
+			end
+		end
+	end
+
 	ui(self, loop)
+
+	if RunService:IsClient() then
+		mouseHighlight(self, remoteEvent)
+	end
 end
 
 --[=[
