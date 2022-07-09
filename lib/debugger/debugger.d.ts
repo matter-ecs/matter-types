@@ -12,6 +12,7 @@ import entityInspect from "./widgets/entityInspect";
 import valueInspect from "./widgets/valueInspect";
 import worldInspect from "./widgets/worldInspect";
 import hoverInspect from "./widgets/hoverInspect";
+import { AnyEntity } from "../World";
 
 declare namespace Debugger {
 	interface CustomWidgets {
@@ -32,6 +33,7 @@ declare namespace Debugger {
 declare class Debugger {
 	public enabled: boolean;
 	public authorize?: (player: Player) => boolean;
+	public findInstanceFromEntity?: (id: AnyEntity) => Instance | undefined;
 
 	public constructor(plasma: Plasma);
 
