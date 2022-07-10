@@ -8,6 +8,7 @@ import { useCurrentSystem, useHookState } from "./topoRuntime";
 import { AnyEntity, Entity, World, Iterate } from "./World";
 import Debugger from "./debugger/debugger";
 import { Widgets } from "@rbxts/plasma";
+import log from "./hooks/log";
 
 export {
 	World,
@@ -16,6 +17,7 @@ export {
 	useEvent,
 	useDeltaTime,
 	useThrottle,
+	log,
 	useHookState,
 	useCurrentSystem,
 	merge,
