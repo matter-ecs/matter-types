@@ -5,7 +5,6 @@ return function(Plasma)
 		options = options or {}
 
 		local refs = Plasma.useInstance(function(ref)
-			
 			return create("TextButton", {
 				[ref] = "label",
 				BackgroundTransparency = 1,
