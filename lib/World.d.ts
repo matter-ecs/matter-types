@@ -120,7 +120,7 @@ export type Iterate<A extends ComponentBundle> = A extends []
 type QueryResult<T extends ComponentBundle> = IterableFunction<LuaTuple<[Entity<T>, ...T]>> & {
 	without: (this: QueryResult<T>, ...components: DynamicBundle) => QueryResult<T>;
 	next: (this: QueryResult<T>) => LuaTuple<[Entity<T>, ...T]>;
-	snapshot: (this: QueryResult<T>) => Readonly<T>;
+	snapshot: (this: QueryResult<T>) => IterableFunction<LuaTuple<[Entity<T>, ...T]>>;
 };
 
 export type FilterOut<T extends Array<unknown>, F> = T extends [infer L, ...infer R]
