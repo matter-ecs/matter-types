@@ -90,9 +90,7 @@ export class World {
 		...bundle: T
 	): LuaTuple<a extends Entity<InferComponents<T>> ? InferComponents<T> : NullableArray<InferComponents<T>>>;
 
-	public query<T extends DynamicBundle, a extends InferComponents<T>>(
-		...dynamic_bundle: T
-	): QueryResult<a> & QueryResultMethods<a>;
+	public query<T extends DynamicBundle, a extends InferComponents<T>>(...dynamic_bundle: T): QueryResult<a>;
 
 	public queryChanged<C extends ComponentCtor>(
 		mt: C,
@@ -121,7 +119,7 @@ export type Iterate<A extends ComponentBundle> = A extends []
 
 type Query<T extends ComponentBundle> = IterableFunction<LuaTuple<[Entity<T>, ...T]>>;
 
-type QueryResult<T extends ComponentBundle> = {
+type QueryResult<T extends ComponentBundle> = Query<T> & {
 	without: (this: Query<T>, ...components: DynamicBundle) => Query<T>;
 	next: (this: Query<T>) => LuaTuple<[Entity<T>, ...T]>;
 	snapshot: (this: Query<T>) => Query<T>;
