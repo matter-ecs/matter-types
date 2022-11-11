@@ -48,7 +48,7 @@ export type NullableComponents<a extends ComponentBundle> = a extends []
 
 export function newComponent<T extends object>(
 	name?: string,
-	defaultData?: T,
+	defaultData?: Partial<T>,
 ): {
 	(data?: T): Component<T>;
 };
