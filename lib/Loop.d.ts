@@ -9,7 +9,7 @@ export type SystemStruct<T extends Array<unknown>> = {
 
 export type System<T extends Array<unknown>> = SystemFn<T> | SystemStruct<T>;
 
-export type AnySystem = SystemFn<Array<unknown>> & SystemStruct<Array<unknown>>;
+export type AnySystem = System<unknown[]>;
 /**
  * @class Loop
  *
