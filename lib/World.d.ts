@@ -100,7 +100,7 @@ export class World {
 
 	public insert(id: AnyEntity, ...dynamic_bundle: ComponentBundle): void;
 
-	public remove<T extends DynamicBundle>(id: AnyEntity, ...dynamic_bundle: T): T;
+	public remove<T extends DynamicBundle>(id: AnyEntity, ...dynamic_bundle: T): LuaTuple<InferComponents<T>>;
 
 	public size(): number;
 
