@@ -11,7 +11,6 @@ import {
 /**
  * Nominal type to describe an entity with an expressed set of associated components.
  * @typeParam T - Bundle of component values
- *
  */
 
 export type Entity<T extends ComponentBundle> = number & {
@@ -24,7 +23,8 @@ export type Entity<T extends ComponentBundle> = number & {
 export type GenericOfEntity<T> = T extends Entity<infer a> ? a : never;
 
 /**
- * AnyEntity is a plain number, and can be used as such or be casted back and forth, however it upholds a type contract that prevents accidental misuse by enforcing developers.
+ * AnyEntity is a plain number, and can be used as such or be casted back and forth, however it upholds a type contract that prevents accidental misuse by enforcing
+ * developers to think about what they really wanted to use.
  */
 export type AnyEntity = Entity<ComponentBundle>;
 
