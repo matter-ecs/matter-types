@@ -1,12 +1,4 @@
-import {
-	AnyComponent,
-	Component,
-	ComponentBundle,
-	ComponentCtor,
-	DynamicBundle,
-	GenericOfComponent,
-	InferComponents,
-} from "./component";
+import { AnyComponent, ComponentBundle, ComponentCtor, DynamicBundle, InferComponents } from "./component";
 
 /**
  * Nominal type to describe an entity with an expressed set of associated components.
@@ -153,16 +145,6 @@ export class World {
 
 	public optimizeQueries(): void;
 }
-
-export type Iterate<A extends ComponentBundle> = A extends []
-	? A
-	: A extends [infer F, ...infer B]
-	? F extends AnyComponent
-		? B extends ComponentBundle
-			? [GenericOfComponent<F>, ...Iterate<B>]
-			: never
-		: never
-	: never;
 
 type Query<T extends ComponentBundle> = IterableFunction<LuaTuple<[Entity<T>, ...T]>>;
 

@@ -5,7 +5,7 @@ import useDeltaTime from "./hooks/useDeltaTime";
 import { Loop, AnySystem, System, SystemFn, SystemStruct } from "./Loop";
 import { None, merge } from "./immutable";
 import { useCurrentSystem, useHookState } from "./topoRuntime";
-import { AnyEntity, Entity, World, Iterate } from "./World";
+import { AnyEntity, Entity, World } from "./World";
 import Debugger from "./debugger/debugger";
 import { Widgets } from "@rbxts/plasma";
 import log from "./hooks/log";
@@ -32,7 +32,6 @@ export type {
 	AnyComponent,
 	InferComponents,
 	GenericOfComponent,
-	Iterate,
 	System,
 	SystemFn,
 	SystemStruct,

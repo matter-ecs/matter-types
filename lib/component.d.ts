@@ -1,7 +1,7 @@
 import { None } from "./immutable";
 
 export type AnyComponent = Component<object>;
-export type ComponentCtor = () => AnyComponent;
+export type ComponentCtor = (data: object) => AnyComponent;
 
 export type ComponentBundle = Array<AnyComponent>;
 
@@ -26,22 +26,14 @@ export type GenericOfComponent<T> = T extends Component<infer A> ? A : never;
 
 export type DynamicBundle = Array<ComponentCtor>;
 
-export type InferComponents<A extends DynamicBundle> = A extends []
+export type InferComponents<A extends DynamicBundle> = { [K in keyof A]: ReturnType<A[K]> };
+
+type InferComponents2<A extends DynamicBundle> = A extends []
 	? A
 	: A extends [infer F, ...infer B]
 	? F extends ComponentCtor
 		? B extends DynamicBundle
-			? [ReturnType<F>, ...InferComponents<B>]
-			: never
-		: never
-	: never;
-
-export type NullableComponents<a extends ComponentBundle> = a extends []
-	? a
-	: a extends [infer F, ...infer B]
-	? F extends AnyComponent
-		? B extends ComponentBundle
-			? [F | undefined, ...NullableComponents<B>]
+			? [ReturnType<F>, ...InferComponents2<B>]
 			: never
 		: never
 	: never;

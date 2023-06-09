@@ -1,4 +1,4 @@
-import { AnySystem, Loop } from "../Loop";
+import { Loop, System } from "../Loop";
 
 import Plasma, { Widgets } from "@rbxts/plasma";
 import panel from "./widgets/panel";
@@ -30,7 +30,7 @@ declare namespace Debugger {
 	}
 }
 
-declare class Debugger {
+declare class Debugger<T extends Array<unknown>> {
 	public enabled: boolean;
 	public authorize?: (player: Player) => boolean;
 	public findInstanceFromEntity?: (id: AnyEntity) => Instance | undefined;
@@ -47,9 +47,9 @@ declare class Debugger {
 
 	public disconnectPlayer(): void;
 
-	public autoInitialize(loop: Loop<Array<unknown>>): void;
+	public autoInitialize(loop: Loop<T>): void;
 
-	public replaceSystem(oldSystem: AnySystem, newSystem: AnySystem): void;
+	public replaceSystem(oldSystem: System<T>, newSystem: System<T>): void;
 
 	public switchToServerView(): void;
 
