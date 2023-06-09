@@ -21,8 +21,8 @@ const WantsMoney = component<{ flag: boolean }>()
 const Marcus = world.spawn(Balance({ amount: 1000 }), Name({ name: "Marcus" }), WantsMoney({ flag: true }))
 const Jade = world.spawn(Balance({ amount: 1000 }), Name({ name: "Jade" }), WantsMoney({ flag: false }))
 
-for (const [entity_id, bal, name, wants_money] of world.query(Balance, Name, WantsMoney)) {
-  if (wants_money.flag) world.insert(entity_id, bal.patch({ amount: bal.amount + 500 }))
+for (const [entityId, bal, name, wantsMoney] of world.query(Balance, Name, WantsMoney)) {
+  if (wantsMoney.flag) world.insert(entityId, bal.patch({ amount: bal.amount + 500 }))
 }
 
 assert(world.get(Marcus, Amount).amount === 1500)
