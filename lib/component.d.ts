@@ -1,7 +1,7 @@
 import { None } from "./immutable";
 
 export type AnyComponent = Component<object>;
-export type ComponentCtor = (data: object) => AnyComponent;
+export type ComponentCtor = () => AnyComponent;
 
 export type ComponentBundle = Array<AnyComponent>;
 
