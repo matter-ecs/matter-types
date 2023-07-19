@@ -1,36 +1,23 @@
-interface ConnectionLike {
-	Disconnect?(): void;
-	Destroy?(): void;
-	disconnect?(): void;
-	destroy?(): void;
-}
+type ConnectionLike =
+	| { Disconnect(): void }
+	| { disconnect(): void }
+	| { Destroy(): void }
+	| { destroy(): void }
+	| (() => void);
 
-interface SignalLike {
-	Connect?(cb: Callback): ConnectionLike;
-	connect?(cb: Callback): ConnectionLike;
-	on?(cb: Callback): ConnectionLike;
-}
+type SignalLike<Args extends Array<unknown>> =
+	| { Connect(callback: (...args: Args) => void): ConnectionLike }
+	| { connect(callback: (...args: Args) => void): ConnectionLike }
+	| { on(callback: (...args: Args) => void): ConnectionLike };
 
-type InferSignalParameters<S> = S extends SignalLike
-	? Parameters<
-			Parameters<
-				S["Connect"] extends Callback
-					? S["Connect"]
-					: S["connect"] extends Callback
-					? S["connect"]
-					: S["on"] extends Callback
-					? S["on"]
-					: never
-			>[0]
-	  >
-	: never;
+type InferSignalParameters<T> = T extends SignalLike<infer U> ? U : never;
 
 declare function useEvent<I extends Instance, E extends InstanceEventNames<I>>(
 	instance: I,
 	event: E,
 ): IterableFunction<LuaTuple<[index: number, ...rest: InferSignalParameters<InstanceEvents<I>[E]>]>>;
 
-declare function useEvent<E extends SignalLike>(
+declare function useEvent<A extends Array<unknown>, E extends SignalLike<A>>(
 	discriminator: unknown,
 	event: E,
 ): IterableFunction<LuaTuple<[index: number, ...rest: InferSignalParameters<E>]>>;
