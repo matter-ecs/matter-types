@@ -5,12 +5,14 @@ import { AnyComponent, ComponentBundle, ComponentCtor, DynamicBundle, InferCompo
  * @typeParam T - Bundle of component values
  */
 
-export type Entity<T extends ComponentBundle> = number & {
-	/**
-	 * @hidden
-	 */
-	readonly __nominal_entity: T;
-};
+export type Entity<T> = T extends ComponentBundle
+	? {
+			/**
+			 * @hidden
+			 */
+			readonly __nominal_entity: UnionToIntersection<T[number]>;
+	  } & number
+	: never;
 
 export type GenericOfEntity<T> = T extends Entity<infer a> ? a : never;
 
