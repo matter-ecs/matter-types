@@ -5,14 +5,30 @@ import { AnyComponent, ComponentBundle, ComponentCtor, DynamicBundle, InferCompo
  * @typeParam T - Bundle of component values
  */
 
-export type Entity<T> = T extends ComponentBundle
-	? {
-			/**
-			 * @hidden
-			 */
-			readonly __nominal_entity: UnionToIntersection<T[number]>;
-	  } & number
-	: never;
+type Entity1<T extends ComponentBundle> = T;
+
+type Entity2<T extends ComponentBundle> = T[number];
+
+type Permutation<T extends unknown[], Prev extends unknown[] = []> = T extends [infer First, ...infer Rest]
+	? [First, ...Permutation<[...Prev, ...Rest]>] | (Rest extends [] ? never : Permutation<Rest, [...Prev, First]>)
+	: [];
+
+type Entity3<T extends ComponentBundle> = Permutation<T>;
+
+declare const withTag: unique symbol;
+export type With<T extends ComponentBundle> = Permutation<T>;
+
+/**
+ * @hidden
+ * @deprecated
+ */
+declare const entityTag: unique symbol;
+
+type Entity5<T extends ComponentBundle, S = T[number]> = [S] extends [any] ? S[] : never;
+
+export type Entity<T extends ComponentBundle> = number & {
+	[entityTag]: Entity3<T>;
+};
 
 export type GenericOfEntity<T> = T extends Entity<infer a> ? a : never;
 
@@ -20,7 +36,7 @@ export type GenericOfEntity<T> = T extends Entity<infer a> ? a : never;
  * AnyEntity is a plain number, and can be used as such or be casted back and forth, however it upholds a type contract that prevents accidental misuse by enforcing
  * developers to think about what they really wanted to use.
  */
-export type AnyEntity = Entity<ComponentBundle>;
+export type AnyEntity = Entity<never>;
 
 type Equals<A1, A2> = (<A>() => A extends A2 ? 1 : 0) extends <A>() => A extends A1 ? 1 : 0 ? 1 : 0;
 
@@ -104,10 +120,12 @@ export class World {
 	 * @remarks
 	 * Component values returned are nullable if the components used to search for aren't associated with the entity (in real-time).
 	 */
-	public get<a extends AnyEntity, T extends ComponentCtor>(
+	public get<a, T extends ComponentCtor>(
 		entity: a,
 		only: T,
-	): Includes<GenericOfEntity<a>, ReturnType<T>> extends true ? ReturnType<T> : ReturnType<T> | undefined;
+	): Includes<a extends Entity<infer A> ? A : never, ReturnType<T>> extends true
+		? ReturnType<T>
+		: ReturnType<T> | undefined;
 
 	/**
 	 * Gets a specific set of components from a specific entity in this world.
@@ -118,7 +136,7 @@ export class World {
 	 * @remarks
 	 * Component values returned are nullable if the components used to search for aren't associated with the entity (in real-time).
 	 */
-	public get<a extends AnyEntity, T extends DynamicBundle>(
+	public get<a, T extends DynamicBundle>(
 		entity: a,
 		...bundle: T
 	): LuaTuple<a extends Entity<InferComponents<T>> ? InferComponents<T> : NullableArray<InferComponents<T>>>;
