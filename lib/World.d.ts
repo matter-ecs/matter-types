@@ -27,7 +27,7 @@ declare const archetype: unique symbol;
 type Entity5<T extends ComponentBundle, S = T[number]> = [S] extends [any] ? S[] : never;
 
 export type Entity<T extends ComponentBundle> = number & {
-	[archetype]: Entity3<T>;
+	[archetype]: T;
 };
 
 export type GenericOfEntity<T> = T extends Entity<infer a> ? a : never;
@@ -36,7 +36,7 @@ export type GenericOfEntity<T> = T extends Entity<infer a> ? a : never;
  * AnyEntity is a plain number, and can be used as such or be casted back and forth, however it upholds a type contract that prevents accidental misuse by enforcing
  * developers to think about what they really wanted to use.
  */
-export type AnyEntity = Entity<never>;
+export type AnyEntity = Entity<ComponentBundle>;
 
 type Equals<A1, A2> = (<A>() => A extends A2 ? 1 : 0) extends <A>() => A extends A1 ? 1 : 0 ? 1 : 0;
 
