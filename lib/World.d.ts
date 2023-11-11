@@ -22,12 +22,12 @@ export type With<T extends ComponentBundle> = Permutation<T>;
  * @hidden
  * @deprecated
  */
-declare const entityTag: unique symbol;
+declare const archetype: unique symbol;
 
 type Entity5<T extends ComponentBundle, S = T[number]> = [S] extends [any] ? S[] : never;
 
 export type Entity<T extends ComponentBundle> = number & {
-	[entityTag]: Entity3<T>;
+	[archetype]: Entity3<T>;
 };
 
 export type GenericOfEntity<T> = T extends Entity<infer a> ? a : never;
