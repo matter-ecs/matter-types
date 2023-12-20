@@ -170,5 +170,5 @@ export class Loop<T extends Array<unknown>> {
 	 * function that actually calls your systems.
 	 * @param middleware - (nextFn: () => void) => () => void
 	 */
-	public addMiddleware(middleware: (nextFn: () => void) => () => void): void;
+	public addMiddleware(middleware: (nextFn: () => void, eventName: string) => () => void): void;
 }
