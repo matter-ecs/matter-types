@@ -33,7 +33,7 @@ return function(plasma)
 				end
 			end)
 
-			if not cache or os.clock() - cache.createdTime > 3 then
+			if not cache or os.clock() - cache.createdTime > debugger.componentRefreshFrequency then
 				cache = {
 					createdTime = os.clock(),
 					uniqueComponents = {},
@@ -57,6 +57,9 @@ return function(plasma)
 					selected = debugComponent == component,
 				})
 			end
+			table.sort(items, function(a, b)
+				return a.text < b.text	
+			end)
 
 			plasma.row({ padding = 30 }, function()
 				local selectedItem = custom.selectionList(items, {
