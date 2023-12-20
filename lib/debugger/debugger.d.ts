@@ -33,6 +33,7 @@ declare namespace Debugger {
 declare class Debugger<T extends Array<unknown>> {
 	public enabled: boolean;
 	public authorize?: (player: Player) => boolean;
+	public componentRefreshFrequency?: number;
 	public findInstanceFromEntity?: (id: AnyEntity) => Instance | undefined;
 
 	public constructor(plasma: Plasma);
