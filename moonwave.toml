@@ -1,0 +1,28 @@
+classOrder = ["Matter", "World", "QueryResult", "Loop"]
+gitSourceBranch = "main"
+
+[docusaurus]
+url = "https://eryn.io"
+tagline = "A modern ECS library for Roblox"
+
+[[navbar.items]]
+href = "https://discord.gg/aQwDAYhqtJ"
+label = "Roblox Open Source Discord"
+position = "right"
+
+[[navbar.items]]
+href = "https://patreon.com/erynlynn"
+label = "Support on Patreon"
+position = "right"
+
+[navbar]
+title = ""
+
+[navbar.logo]
+alt = "Matter"
+src = "/logo.svg"
+
+[home]
+enabled = true
+includeReadme = false
+

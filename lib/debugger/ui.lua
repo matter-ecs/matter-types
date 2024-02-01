@@ -52,20 +52,21 @@ local function ui(debugger, loop)
 
 		custom.panel(function()
 			if
-				custom.realmSwitch({
-					left = "client",
-					right = "server",
-					isRight = IS_SERVER,
-					tag = if IS_SERVER then "MatterDebuggerSwitchToClientView" else nil,
-				}):clicked()
+				custom
+					.realmSwitch({
+						left = "client",
+						right = "server",
+						isRight = IS_SERVER,
+						tag = if IS_SERVER then "MatterDebuggerSwitchToClientView" else nil,
+					})
+					:clicked()
 			then
 				if IS_CLIENT then
 					debugger:switchToServerView()
 				end
 			end
 
-			plasma.space(30)
-
+			plasma.space(15)
 			plasma.heading("STATE")
 			plasma.space(10)
 
@@ -115,9 +116,12 @@ local function ui(debugger, loop)
 				end
 			end
 
-			plasma.space(30)
+			plasma.space(15)
 			plasma.heading("SYSTEMS")
 			plasma.space(10)
+
+			local durations = {}
+			local longestDuration = 0
 
 			for _, eventName in debugger._eventOrder do
 				local systems = loop._orderedSystemsByEvent[eventName]
@@ -129,28 +133,34 @@ local function ui(debugger, loop)
 				plasma.heading(eventName, {
 					font = Enum.Font.Gotham,
 				})
-				plasma.space(10)
+				plasma.space(5)
+
 				local items = {}
 
 				for _, system in systems do
 					local samples = loop.profiling[system]
-					local averageFrameTime = ""
-					local icon
-
 					if samples then
 						local duration = rollingAverage.getAverage(samples)
 
-						if duration > 0.004 then -- 4ms
-							icon = "\xe2\x9a\xa0\xef\xb8\x8f"
-						end
+						durations[system] = duration
+						longestDuration = math.max(longestDuration, duration)
+					end
+				end
 
-						if loop._systemErrors[system] then
-							icon = "\xf0\x9f\x92\xa5"
-						end
+				for index, system in systems do
+					local averageFrameTime = ""
+					local icon
 
-						local humanDuration, unit = formatDuration(duration)
+					local duration = durations[system] or 0
+					local humanDuration, unit = formatDuration(duration)
+					averageFrameTime = string.format("%.0f%s", humanDuration, unit)
 
-						averageFrameTime = string.format("%.0f%s", humanDuration, unit)
+					if duration > 0.004 then -- 4ms
+						icon = "\xe2\x9a\xa0\xef\xb8\x8f"
+					end
+
+					if loop._systemErrors[system] then
+						icon = "\xf0\x9f\x92\xa5"
 					end
 
 					table.insert(items, {
@@ -159,6 +169,8 @@ local function ui(debugger, loop)
 						selected = debugger.debugSystem == system,
 						system = system,
 						icon = icon,
+						barWidth = duration / longestDuration,
+						index = index,
 					})
 				end
 
@@ -172,7 +184,7 @@ local function ui(debugger, loop)
 					end
 				end
 
-				plasma.space(20)
+				plasma.space(10)
 			end
 		end)
 
@@ -205,34 +217,38 @@ local function ui(debugger, loop)
 
 				local name = systemName(debugger.debugSystem)
 
-				local closed = plasma.window({
-					title = "System",
-					closable = true,
-				}, function()
-					plasma.useKey(name)
-					plasma.heading(name)
-					plasma.space(0)
+				local closed = plasma
+					.window({
+						title = "System",
+						closable = true,
+					}, function()
+						plasma.useKey(name)
 
-					plasma.row(function()
-						if plasma.button(string.format("View queries (%d)", #debugger._queries)):clicked() then
-							setQueriesOpen(true)
-						end
-
-						if numLogs > 0 then
-							if plasma.button(string.format("View logs (%d)", numLogs)):clicked() then
-								setLogsOpen(true)
+						plasma.row(function()
+							if plasma.button(string.format("View queries (%d)", #debugger._queries)):clicked() then
+								setQueriesOpen(true)
 							end
+
+							if numLogs > 0 then
+								if plasma.button(string.format("View logs (%d)", numLogs)):clicked() then
+									setLogsOpen(true)
+								end
+							end
+						end)
+
+						local currentlyDisabled = loop._skipSystems[debugger.debugSystem]
+
+						if
+							plasma
+								.checkbox("Disable system", {
+									checked = currentlyDisabled,
+								})
+								:clicked()
+						then
+							loop._skipSystems[debugger.debugSystem] = not currentlyDisabled
 						end
 					end)
-
-					local currentlyDisabled = loop._skipSystems[debugger.debugSystem]
-
-					if plasma.checkbox("Disable system", {
-						checked = currentlyDisabled,
-					}):clicked() then
-						loop._skipSystems[debugger.debugSystem] = not currentlyDisabled
-					end
-				end):closed()
+					:closed()
 
 				if queriesOpen then
 					local closed = custom.queryInspect(debugger)
@@ -249,18 +265,20 @@ local function ui(debugger, loop)
 				plasma.useKey(name)
 
 				if numLogs > 0 and logsOpen then
-					local closed = plasma.window({
-						closable = true,
-						title = "Logs",
-					}, function()
-						local items = {}
-						for i = numLogs, 1, -1 do
-							table.insert(items, { loop._systemLogs[debugger.debugSystem][i] })
-						end
-						plasma.table(items, {
-							font = Enum.Font.Code,
-						})
-					end):closed()
+					local closed = plasma
+						.window({
+							closable = true,
+							title = "Logs",
+						}, function()
+							local items = {}
+							for i = numLogs, 1, -1 do
+								table.insert(items, { loop._systemLogs[debugger.debugSystem][i] })
+							end
+							plasma.table(items, {
+								font = Enum.Font.Code,
+							})
+						end)
+						:closed()
 
 					if closed then
 						setLogsOpen(false)
