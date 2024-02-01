@@ -1,66 +1,62 @@
-# Matter [![CI status][ci-badge]][ci] [![Docs status][docs-badge]][docs] [![NPM package version][npm-badge]][package]
+<div align="center">
+	<h1>
+    <img src=".moonwave/static/logo.svg" alt="Matter" width="600" />
+  </h1>
+</div>
+<div align="center">
+	<a href="https://github.com/matter-ecs/matter/actions/workflows/ci.yaml">
+		<img src="https://github.com/matter-ecs/matter/actions/workflows/ci.yaml/badge.svg" alt="CI status">
+	</a>
+  <a href="https://matter-ecs.github.io/matter/">
+		<img src="https://github.com/matter-ecs/matter/actions/workflows/docs.yaml/badge.svg" alt="Docs status">
+	</a>
+</div>
+<br>
 
-**Matter** is a modern ECS library for _[Roblox]_ with _[roblox-ts]_ typings.
+**Matter** is a modern ECS library for _[Roblox]_.
 
-[ci-badge]: https://github.com/matter-ecs/matter/actions/workflows/ci.yaml/badge.svg
-[docs-badge]: https://github.com/matter-ecs/matter/actions/workflows/docs.yaml/badge.svg
-[npm-badge]: https://img.shields.io/npm/v/%40rbxts/matter?color=34D058
-[ci]: https://github.com/matter-ecs/matter/actions/workflows/ci.yaml
-[docs]: https://matter-ecs.github.io/matter/
-[package]: https://npmjs.org/package/@rbxts/matter
 [roblox]: https://www.roblox.com/
-[roblox-ts]: https://roblox-ts.com/
 
 ## Installation
 
-Matter can be installed with [npm] in your project by running the following
-command.
+Matter can be installed with [Wally] by including it as a dependency in your
+`wally.toml` file.
 
-```sh
-npm install @rbxts/matter
+```toml
+Matter = "matter-ecs/matter@0.7.1"
 ```
 
-[npm]: https://www.npmjs.com/
+## Migration
 
-## Usage
+If you're currently using the scope `evaera/matter`, prior versions are the same
+package. You can migrate by changing your `wally.toml` file to use the scope
+`matter-ecs/matter`.
 
-```ts
-import { component, Loop, World } from "@rbxts/matter"
+## Building
 
-const world = new World()
+Before building, you'll need to install all dependencies using [Wally].
 
-const Balance = component<{ amount: number }>()
-const Name = component<{ name: string} >()
-const WantsMoney = component<{ flag: boolean }>()
+You can then sync or build the project with [Rojo]. Matter contains several
+project files with different builds of the project. The `default.project.json`
+is the package build. The `example.project.json` is the example game build.
 
-const Marcus = world.spawn(Balance({ amount: 1000 }), Name({ name: "Marcus" }), WantsMoney({ flag: true }))
-const Jade = world.spawn(Balance({ amount: 1000 }), Name({ name: "Jade" }), WantsMoney({ flag: false }))
-
-for (const [entityId, bal, name, wantsMoney] of world.query(Balance, Name, WantsMoney)) {
-  if (wantsMoney.flag) world.insert(entityId, bal.patch({ amount: bal.amount + 500 }))
-}
-
-assert(world.get(Marcus, Amount).amount === 1500)
-assert(world.get(Jade, Amount).amount === 1000)
-```
-
-To see Matter used in a game, check out [For Animia].
-
-[for animia]: https://github.com/ukendio/for-animia
+[rojo]: https://rojo.space/
+[wally]: https://wally.run/
 
 ## Contributing
 
-Contributions are welcome, please make a pull request!
+Contributions are welcome, please make a pull request! Check out our
+[contribution] guide for further information.
 
-Only types should be contributed to this project. General changes should be made
-to the [main project].
+Please read our [code of conduct] when getting involved.
 
-Please read our [contribution] guide and [code of conduct] when getting
-involved.
+[contribution]: CONTRIBUTING.md
+[code of conduct]: CODE_OF_CONDUCT.md
 
-[main project]: https://github.com/matter-ecs/matter
-[contribution]: https://github.com/matter-ecs/matter/blob/main/CONTRIBUTING.md
-[code of conduct]: https://github.com/matter-ecs/matter/blob/main/CODE_OF_CONDUCT.md
+## Project Legacy
+
+Matter was originally pioneered by [@evaera](https://www.github.com/evaera). She
+laid the robust foundation for the work we continue today.
 
 ## License
 
