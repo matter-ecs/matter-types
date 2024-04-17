@@ -120,26 +120,7 @@ export class World {
 	 * @remarks
 	 * Component values returned are nullable if the components used to search for aren't associated with the entity (in real-time).
 	 */
-	public get<a, T extends ComponentCtor>(
-		entity: a,
-		only: T,
-	): Includes<a extends Entity<infer A> ? A : never, ReturnType<T>> extends true
-		? ReturnType<T>
-		: ReturnType<T> | undefined;
-
-	/**
-	 * Gets a specific set of components from a specific entity in this world.
-	 *
-	 * @param entity - The entity ID
-	 * @param bundle - The components to fetch
-	 * @returns Returns the component values in the same order they were passed to.
-	 * @remarks
-	 * Component values returned are nullable if the components used to search for aren't associated with the entity (in real-time).
-	 */
-	public get<a, T extends DynamicBundle>(
-		entity: a,
-		...bundle: T
-	): LuaTuple<a extends Entity<InferComponents<T>> ? InferComponents<T> : NullableArray<InferComponents<T>>>;
+	public get<T extends DynamicBundle>(entity: AnyEntity, ...bundle: T): LuaTuple<NullableArray<InferComponents<T>>>;
 
 	/**
 	 * Performs a query against the entities in this World. Returns a [QueryResult](/api/QueryResult), which iterates over
