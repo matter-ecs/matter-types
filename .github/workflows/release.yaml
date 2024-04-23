@@ -5,7 +5,7 @@ on:
     tags: ["v*"]
 
 jobs:
-  release:
+  build:
     name: Release
     runs-on: ubuntu-latest
     steps:

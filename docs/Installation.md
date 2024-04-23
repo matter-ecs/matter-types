@@ -24,7 +24,7 @@ registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 
 [dependencies]
-matter = "evaera/matter@X.X.X" # Don't copy this. This won't work.
+matter = "matter-ecs/matter@X.X.X" # Don't copy this. This won't work.
                                # Copy real string from page linked above.
 ```
 
