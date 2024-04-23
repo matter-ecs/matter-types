@@ -178,7 +178,7 @@ type QueryResult<T extends ComponentBundle> = Query<T> & {
 	 * }
 	 * ```
 	 */
-	without: (this: Query<T>, ...components: DynamicBundle) => Query<T>;
+	without: (this: Query<T>, ...components: DynamicBundle) => QueryResult<T>;
 	/**
 	 * Returns the next set of values from the query result. Once all results have been returned, the
 	 * QueryResult is exhausted and is no longer useful.
@@ -230,6 +230,28 @@ type QueryResult<T extends ComponentBundle> = Query<T> & {
 	However, the table itself is just a list of sub-tables structured like `{entityId, component1, component2, ...etc}`.
 	 */
 	snapshot: (this: Query<T>) => ReadonlyArray<[Entity<T>, ...T]>;
+
+	/**
+	 * Creates a View of the query and does all of the iterator tasks at once at an amortized cost.
+	This is used for many repeated random access to an entity. If you only need to iterate, just use a query.
+
+	```ts
+	local inflicting = world:query(Damage, Hitting, Player):view()
+	for (const [_, source] of world.query(DamagedBy)) {}
+		local damage = inflicting:get(source.from)
+	end
+
+	for _ in world:query(Damage):view() do end -- You can still iterate views if you want!
+	```
+	
+	@returns View See [View](/api/View) docs.
+	 */
+	view: View<T>;
+};
+
+type View<T extends ComponentBundle> = Query<T> & {
+	get: (this: View<T>, id: AnyEntity) => LuaTuple<T>;
+	contains: (this: View<T>) => boolean;
 };
 
 export type FilterOut<T extends Array<unknown>, F> = T extends [infer L, ...infer R]
