@@ -91,4 +91,4 @@ value, so we don't have to mutate the existing component.
 ## Next steps
 You should dive in to the [API reference](/api/Matter)! The Matter API is simple and documented in detail.
 
-And if you haven't already, check out the [`/example` directory in the matter repo](https://github.com/evaera/matter/tree/main/example/).
+And if you haven't already, check out the [`/example` directory in the matter repo](https://github.com/matter-ecs/matter/tree/main/example/).
