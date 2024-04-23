@@ -120,26 +120,7 @@ export class World {
 	 * @remarks
 	 * Component values returned are nullable if the components used to search for aren't associated with the entity (in real-time).
 	 */
-	public get<a, T extends ComponentCtor>(
-		entity: a,
-		only: T,
-	): Includes<a extends Entity<infer A> ? A : never, ReturnType<T>> extends true
-		? ReturnType<T>
-		: ReturnType<T> | undefined;
-
-	/**
-	 * Gets a specific set of components from a specific entity in this world.
-	 *
-	 * @param entity - The entity ID
-	 * @param bundle - The components to fetch
-	 * @returns Returns the component values in the same order they were passed to.
-	 * @remarks
-	 * Component values returned are nullable if the components used to search for aren't associated with the entity (in real-time).
-	 */
-	public get<a, T extends DynamicBundle>(
-		entity: a,
-		...bundle: T
-	): LuaTuple<a extends Entity<InferComponents<T>> ? InferComponents<T> : NullableArray<InferComponents<T>>>;
+	public get<T extends DynamicBundle>(entity: AnyEntity, ...bundle: T): LuaTuple<NullableArray<InferComponents<T>>>;
 
 	/**
 	 * Performs a query against the entities in this World. Returns a [QueryResult](/api/QueryResult), which iterates over
@@ -197,7 +178,7 @@ type QueryResult<T extends ComponentBundle> = Query<T> & {
 	 * }
 	 * ```
 	 */
-	without: (this: Query<T>, ...components: DynamicBundle) => Query<T>;
+	without: (this: Query<T>, ...components: DynamicBundle) => QueryResult<T>;
 	/**
 	 * Returns the next set of values from the query result. Once all results have been returned, the
 	 * QueryResult is exhausted and is no longer useful.
@@ -249,6 +230,28 @@ type QueryResult<T extends ComponentBundle> = Query<T> & {
 	However, the table itself is just a list of sub-tables structured like `{entityId, component1, component2, ...etc}`.
 	 */
 	snapshot: (this: Query<T>) => ReadonlyArray<[Entity<T>, ...T]>;
+
+	/**
+	 * Creates a View of the query and does all of the iterator tasks at once at an amortized cost.
+	This is used for many repeated random access to an entity. If you only need to iterate, just use a query.
+
+	```ts
+	local inflicting = world:query(Damage, Hitting, Player):view()
+	for (const [_, source] of world.query(DamagedBy)) {}
+		local damage = inflicting:get(source.from)
+	end
+
+	for _ in world:query(Damage):view() do end -- You can still iterate views if you want!
+	```
+	
+	@returns View See [View](/api/View) docs.
+	 */
+	view: View<T>;
+};
+
+type View<T extends ComponentBundle> = Query<T> & {
+	get: (this: View<T>, id: AnyEntity) => LuaTuple<T>;
+	contains: (this: View<T>) => boolean;
 };
 
 export type FilterOut<T extends Array<unknown>, F> = T extends [infer L, ...infer R]
