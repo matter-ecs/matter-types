@@ -116,11 +116,6 @@ We can make a system that handles both of these cases for us.
 for id, transformRecord in world:queryChanged(Transform) do
 
 	local model = world:get(id, Model)
-<<<<<<< HEAD
-	
-=======
-
->>>>>>> 627635d72d2278846eacb4a446ee4a2e85817fa1
 	-- Take care to ignore the changed event if it was us that triggered it
 	if model and transformRecord.new and not transformRecord.new.doNotReconcile then
 		model.instance:SetPrimaryPartCFrame(transformRecord.new.cframe)
@@ -131,11 +126,6 @@ end
 for id, modelRecord in world:queryChanged(Model) do
 
 	local transform = world:get(id, Transform)
-<<<<<<< HEAD
-	
-=======
-
->>>>>>> 627635d72d2278846eacb4a446ee4a2e85817fa1
 	if transform and modelRecord.new then
 		modelRecord.new.model:SetPrimaryPartCFrame(transform.cframe)
 	end
