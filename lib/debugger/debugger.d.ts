@@ -59,6 +59,8 @@ declare class Debugger<T extends Array<unknown>> {
 	public draw<T extends Array<unknown>>(loop: Loop<T>): void;
 
 	public getWidgets(): Widgets;
+	
+	public loopParameterNames: Array<string>;
 }
 
 export = Debugger;
