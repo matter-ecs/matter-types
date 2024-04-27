@@ -118,6 +118,17 @@ export class World {
 	 * @param only - The component to fetch
 	 * @returns Returns the component values in the same order they were passed to.
 	 * @remarks
+	 * Component value returned is nullable if it isn't associated with the entity (in real-time).
+	 */
+	public get<T extends ComponentCtor>(entity: AnyEntity, only: T): ReturnType<T> | undefined;
+
+	/**
+	 * Gets multiple components from a specific entity in this world.
+	 *
+	 * @param entity - The entity ID
+	 * @param bundle - The components to fetch
+	 * @returns Returns the component values in the same order they were passed to.
+	 * @remarks
 	 * Component values returned are nullable if the components used to search for aren't associated with the entity (in real-time).
 	 */
 	public get<T extends DynamicBundle>(entity: AnyEntity, ...bundle: T): LuaTuple<NullableArray<InferComponents<T>>>;
@@ -236,17 +247,17 @@ type QueryResult<T extends ComponentBundle> = Query<T> & {
 	This is used for many repeated random access to an entity. If you only need to iterate, just use a query.
 
 	```ts
-	local inflicting = world:query(Damage, Hitting, Player):view()
-	for (const [_, source] of world.query(DamagedBy)) {}
-		local damage = inflicting:get(source.from)
-	end
+	const inflicting = world.query(Damage, Hitting, Player).view()
+	for (const [_, source] of world.query(DamagedBy)) {
+		const damage = inflicting.get(source.from)
+	}
 
-	for _ in world:query(Damage):view() do end -- You can still iterate views if you want!
+	for (const [, damage] of world.query(Damage).view()) {} -- You can still iterate views if you want!
 	```
 	
 	@returns View See [View](/api/View) docs.
 	 */
-	view: View<T>;
+	view: () => View<T>;
 };
 
 type View<T extends ComponentBundle> = Query<T> & {
