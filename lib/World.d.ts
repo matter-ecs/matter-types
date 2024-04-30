@@ -257,7 +257,7 @@ type QueryResult<T extends ComponentBundle> = Query<T> & {
 	
 	@returns View See [View](/api/View) docs.
 	 */
-	view: () => View<T>;
+	view: (this: Query<T>) => View<T>;
 };
 
 type View<T extends ComponentBundle> = Query<T> & {
