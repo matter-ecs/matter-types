@@ -214,7 +214,7 @@ type QueryResult<T extends ComponentBundle> = Query<T> & {
 	 * @returns A LuaTuple of an entity followed with queried components
 	 * @See {@link Entity Entity}
 	 */
-	next: (this: Query<T>) => LuaTuple<[Entity<T>, ...T]>;
+	next: (this: Query<T>) => LuaTuple<[Entity<T>, ...T] | [undefined, ...{ [k in keyof T]: undefined }]>;
 	/**
 	 * Creates a "snapshot" of this query, draining this QueryResult and returning a list containing all of its results.
 	 * 
