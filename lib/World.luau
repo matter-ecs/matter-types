@@ -1,6 +1,6 @@
+local Component = require(script.Parent.component)
 local archetypeModule = require(script.Parent.archetype)
 local topoRuntime = require(script.Parent.topoRuntime)
-local Component = require(script.Parent.component)
 
 local assertValidComponentInstance = Component.assertValidComponentInstance
 local assertValidComponent = Component.assertValidComponent
@@ -375,18 +375,25 @@ local function noop() end
 
 local noopQuery = setmetatable({
 	next = noop,
-	snapshot = noop,
+	snapshot = function()
+		return {}
+	end,
 	without = function(self)
 		return self
 	end,
-	view = {
-		get = noop,
-		contains = noop,
-	},
+	view = function()
+		return {
+			get = noop,
+			contains = function()
+				return false
+			end,
+		}
+	end,
 }, {
 	__iter = function()
 		return noop
 	end,
+	__call = noop,
 })
 
 --[=[
@@ -407,13 +414,14 @@ local noopQuery = setmetatable({
 local QueryResult = {}
 QueryResult.__index = QueryResult
 
-function QueryResult.new(world, expand, queryArchetype, compatibleArchetypes)
+function QueryResult.new(world, expand, queryArchetype, compatibleArchetypes, metatables)
 	return setmetatable({
 		world = world,
 		seenEntities = {},
 		currentCompatibleArchetype = next(compatibleArchetypes),
 		compatibleArchetypes = compatibleArchetypes,
 		storageIndex = 1,
+		metatables = metatables,
 		_expand = expand,
 		_queryArchetype = queryArchetype,
 	}, QueryResult)
@@ -613,7 +621,7 @@ end
 
 	Provides random access to the results of a query.
 
-	Calling the View is equivalent to iterating a query. 
+	Calling the View is equivalent to iterating a query.
 
 	```lua
 	for id, player, health, poison in world:query(Player, Health, Poison):view() do
@@ -634,32 +642,77 @@ end
 
 	for _ in world:query(Damage):view() do end -- You can still iterate views if you want!
 	```
-	
+
 	@return View See [View](/api/View) docs.
 ]=]
 
 function QueryResult:view()
+	local components = {}
+	local metatables = self.metatables
+	local queryLength = #metatables
+	local componentRecords = {}
+	for index, metatable in metatables do
+		components[index] = {}
+		componentRecords[metatable] = index
+	end
+
 	local function iter()
 		return nextItem(self)
 	end
 
-	local fetches = {}
-	local list = {} :: any
+	local entities = {}
+	local entityIndex = 0
+	local entityRecords = {}
+
+	for entityId, entityData in iter do
+		entityIndex += 1
+
+		for metatable, componentIndex in componentRecords do
+			components[componentIndex][entityId] = entityData[metatable]
+		end
+
+		entities[entityIndex] = entityId
+		entityRecords[entityId] = entityIndex
+	end
 
 	local View = {}
 	View.__index = View
 
+	local tuple = {}
+	local function expand(entity)
+		if queryLength == 1 then
+			return components[1][entity]
+		elseif queryLength == 2 then
+			return components[1][entity], components[2][entity]
+		elseif queryLength == 3 then
+			return components[1][entity], components[2][entity], components[3][entity]
+		elseif queryLength == 4 then
+			return components[1][entity], components[2][entity], components[3][entity], components[4][entity]
+		elseif queryLength == 5 then
+			return components[1][entity],
+				components[2][entity],
+				components[3][entity],
+				components[4][entity],
+				components[5][entity]
+		end
+
+		for index, componentField in components do
+			tuple[index] = componentField[entity]
+		end
+
+		return unpack(tuple)
+	end
+
 	function View:__iter()
-		local current = list.head
+		local index = 0
 		return function()
-			if not current then
+			index += 1
+			local entity = entities[index]
+			if not entity then
 				return
 			end
-			local entity = current.entity
-			local fetch = fetches[entity]
-			current = current.next
 
-			return entity, unpack(fetch, 1, fetch.n)
+			return entity, expand(entity)
 		end
 	end
 
@@ -674,53 +727,18 @@ function QueryResult:view()
 			return
 		end
 
-		local fetch = fetches[entity]
-		local queryLength = fetch.n
-
-		if queryLength == 1 then
-			return fetch[1]
-		elseif queryLength == 2 then
-			return fetch[1], fetch[2]
-		elseif queryLength == 3 then
-			return fetch[1], fetch[2], fetch[3]
-		elseif queryLength == 4 then
-			return fetch[1], fetch[2], fetch[3], fetch[4]
-		elseif queryLength == 5 then
-			return fetch[1], fetch[2], fetch[3], fetch[4], fetch[5]
-		end
-
-		return unpack(fetch, 1, fetch.n)
+		return expand(entity)
 	end
 
 	--[=[
 		@within View
-		Equivalent to `world:contains()`	
+		Equivalent to `world:contains()`
 		@param entity number - the entity ID
-		@return boolean 
+		@return boolean
 	]=]
 
 	function View:contains(entity)
-		return fetches[entity] ~= nil
-	end
-
-	for entityId, entityData in iter do
-		if entityId then
-			-- We start at 2 on Select since we don't need want to pack the entity id.
-			local fetch = table.pack(select(2, self._expand(entityId, entityData)))
-			local node = { entity = entityId, next = nil }
-
-			fetches[entityId] = fetch
-
-			if not list.head then
-				list.head = node
-			else
-				local current = list.head
-				while current.next do
-					current = current.next
-				end
-				current.next = node
-			end
-		end
+		return entityRecords[entity] ~= nil
 	end
 
 	return setmetatable({}, View)
@@ -807,7 +825,7 @@ function World:query(...)
 		self:_markStorageDirty()
 	end
 
-	return QueryResult.new(self, expand, archetype, compatibleArchetypes)
+	return QueryResult.new(self, expand, archetype, compatibleArchetypes, metatables)
 end
 
 local function cleanupQueryChanged(hookState)

@@ -52,8 +52,4 @@ return setupTags
 
 ```
 
-<<<<<<< HEAD
 This example can be modified to meet your game's needs as you see fit.
-=======
-This example can be modified to meet your game's needs as you see fit.
->>>>>>> 627635d72d2278846eacb4a446ee4a2e85817fa1
