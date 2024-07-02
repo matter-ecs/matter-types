@@ -262,7 +262,7 @@ type QueryResult<T extends ComponentBundle> = Query<T> & {
 
 type View<T extends ComponentBundle> = Query<T> & {
 	get: (this: View<T>, id: AnyEntity) => LuaTuple<T>;
-	contains: (this: View<T>) => boolean;
+	contains: (this: View<T>, id: AnyEntity) => boolean;
 };
 
 export type FilterOut<T extends Array<unknown>, F> = T extends [infer L, ...infer R]
