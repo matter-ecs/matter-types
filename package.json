@@ -1,6 +1,6 @@
 {
   "name": "@rbxts/matter",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "",
   "main": "lib/init.lua",
   "repository": {
@@ -14,17 +14,11 @@
   },
   "keywords": [],
   "author": "",
-  "contributors": [
-    "Evaera",
-    "Lpghatguy",
-    "Ukendio <- did nothing"
-  ],
+  "contributors": ["Evaera", "Lpghatguy", "Ukendio <- did nothing"],
   "homepage": "https://eryn.io/matter/",
   "license": "ISC",
   "types": "lib/index.d.ts",
-  "files": [
-    "lib/"
-  ],
+  "files": ["lib/"],
   "publishConfig": {
     "access": "public"
   },
