@@ -14,18 +14,24 @@
   },
   "keywords": [],
   "author": "",
-  "contributors": ["Evaera", "Lpghatguy", "Ukendio <- did nothing"],
+  "contributors": [
+    "Evaera",
+    "Lpghatguy",
+    "Ukendio <- did nothing"
+  ],
   "homepage": "https://eryn.io/matter/",
   "license": "ISC",
   "types": "lib/index.d.ts",
-  "files": ["lib/"],
+  "files": [
+    "lib/"
+  ],
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
-    "@rbxts/compiler-types": "github:roblox-ts/compiler-types",
+    "@rbxts/compiler-types": "^2.3.0-types.1",
     "@rbxts/plasma": "^0.3.0-ts.5",
-    "@rbxts/types": "^1.0.558",
+    "@rbxts/types": "^1.0.788",
     "@typescript-eslint/eslint-plugin": "^5.8.0",
     "@typescript-eslint/parser": "^5.8.0",
     "eslint": "^8.5.0",
@@ -33,7 +39,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-roblox-ts": "^0.0.32",
     "prettier": "^2.5.1",
-    "roblox-ts": "^1.3.3-dev-5633519",
-    "typescript": "^4.5.4"
+    "roblox-ts": "^2.3.0",
+    "typescript": "^5.4.2"
   }
 }
