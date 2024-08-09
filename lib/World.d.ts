@@ -26,7 +26,7 @@ declare const archetype: unique symbol;
 
 type Entity5<T extends ComponentBundle, S = T[number]> = [S] extends [any] ? S[] : never;
 
-export type Entity<T extends ComponentBundle> = number & {
+export type Entity<T = ComponentBundle> = number & {
 	[archetype]: T;
 };
 
@@ -36,7 +36,7 @@ export type GenericOfEntity<T> = T extends Entity<infer a> ? a : never;
  * AnyEntity is a plain number, and can be used as such or be casted back and forth, however it upholds a type contract that prevents accidental misuse by enforcing
  * developers to think about what they really wanted to use.
  */
-export type AnyEntity = Entity<ComponentBundle>;
+export type AnyEntity = Entity;
 
 type Equals<A1, A2> = (<A>() => A extends A2 ? 1 : 0) extends <A>() => A extends A1 ? 1 : 0 ? 1 : 0;
 
@@ -131,7 +131,19 @@ export class World {
 	 * @remarks
 	 * Component values returned are nullable if the components used to search for aren't associated with the entity (in real-time).
 	 */
+	public get<a extends Entity, T extends ComponentCtor>(
+		entity: a,
+		only: T,
+	): Includes<a extends Entity<infer A> ? A : never, ReturnType<T>> extends true
+		? ReturnType<T>
+		: ReturnType<T> | undefined;
 	public get<T extends DynamicBundle>(entity: AnyEntity, ...bundle: T): LuaTuple<NullableArray<InferComponents<T>>>;
+
+	public get<T extends DynamicBundle>(entity: Entity<T>, ...bundle: T): LuaTuple<InferComponents<T>>;
+	public get<a, T extends DynamicBundle>(
+		entity: a,
+		...bundle: T
+	): LuaTuple<a extends Entity<InferComponents<T>> ? InferComponents<T> : NullableArray<InferComponents<T>>>;
 
 	/**
 	 * Performs a query against the entities in this World. Returns a [QueryResult](/api/QueryResult), which iterates over
@@ -257,7 +269,7 @@ type QueryResult<T extends ComponentBundle> = Query<T> & {
 	
 	@returns View See [View](/api/View) docs.
 	 */
-	view: () => View<T>;
+	view: (this: Query<T>) => View<T>;
 };
 
 type View<T extends ComponentBundle> = Query<T> & {

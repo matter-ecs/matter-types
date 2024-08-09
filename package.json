@@ -2,7 +2,7 @@
   "name": "@rbxts/matter",
   "version": "0.8.1",
   "description": "",
-  "main": "lib/init.lua",
+  "main": "lib/init.luau",
   "repository": {
     "type": "git",
     "url": "https://github.com/ukendio/matter.git"
