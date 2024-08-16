@@ -57,6 +57,7 @@ function Loop.new(...)
 		_middlewares = {},
 		_systemErrors = {},
 		_systemLogs = {},
+		_debugger = nil,
 		profiling = nil,
 		trackErrors = false,
 	}, Loop)
@@ -300,9 +301,7 @@ function Loop:_sortSystems()
 						error(
 							`Unable to schedule "{systemName(system)}" because the system "{systemName(dependency)}" is not scheduled.\n\nEither schedule "{systemName(
 								dependency
-							)}" before "{systemName(
-								system
-							)}" or consider scheduling these systems together with Loop:scheduleSystems`
+							)}" before "{systemName(system)}" or consider scheduling these systems together with Loop:scheduleSystems`
 						)
 					end
 				end
@@ -402,7 +401,22 @@ function Loop:begin(events)
 							profiling[system] = {}
 						end
 
-						rollingAverage.addSample(profiling[system], duration)
+						local debugger = self._debugger
+
+						if debugger and debugger.debugSystem == system and debugger._queries then
+							local totalQueryTime = 0
+
+							for _, query in debugger._queries do
+								totalQueryTime += query.averageDuration
+							end
+
+							rollingAverage.addSample(
+								profiling[system],
+								if debugger.debugSystem then duration - totalQueryTime else duration
+							)
+						else
+							rollingAverage.addSample(profiling[system], duration)
+						end
 					end
 
 					if coroutine.status(thread) ~= "dead" then

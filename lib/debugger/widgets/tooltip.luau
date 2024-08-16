@@ -1,8 +1,14 @@
 local CollectionService = game:GetService("CollectionService")
+
+type Options = {
+	tag: string,
+	backgroundTransparency: number?,
+}
+
 return function(plasma)
 	local create = plasma.create
 
-	return plasma.widget(function(text)
+	return plasma.widget(function(text, options: Options)
 		local refs = plasma.useInstance(function(ref)
 			local style = plasma.useStyle()
 
@@ -10,14 +16,16 @@ return function(plasma)
 				[ref] = "label",
 				TextXAlignment = Enum.TextXAlignment.Left,
 				TextYAlignment = Enum.TextYAlignment.Top,
-				TextSize = 15,
+				TextSize = 13,
+				RichText = true,
 				BorderSizePixel = 0,
 				Font = Enum.Font.Code,
 				TextStrokeTransparency = 0.5,
 				TextColor3 = Color3.new(1, 1, 1),
-				BackgroundTransparency = 0.5,
+				BackgroundTransparency = options.backgroundTransparency or 0.2,
 				BackgroundColor3 = style.bg1,
 				AutomaticSize = Enum.AutomaticSize.XY,
+				ZIndex = 100,
 
 				create("UIPadding", {
 					PaddingBottom = UDim.new(0, 4),
@@ -33,7 +41,7 @@ return function(plasma)
 				}),
 			})
 
-			CollectionService:AddTag(ref.label, "MatterDebuggerTooltip")
+			CollectionService:AddTag(ref.label, options.tag)
 
 			return ref.label
 		end)
