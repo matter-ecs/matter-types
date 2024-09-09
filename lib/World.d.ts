@@ -273,7 +273,13 @@ type QueryResult<T extends ComponentBundle> = Query<T> & {
 };
 
 type View<T extends ComponentBundle> = Query<T> & {
-	get: (this: View<T>, id: AnyEntity) => LuaTuple<T>;
+	get<E>(
+		entity: E,
+	): T extends [AnyComponent]
+		? E extends Entity<T>
+			? T[0]
+			: T[0] | undefined
+		: LuaTuple<E extends Entity<T> ? T : NullableArray<T>>;
 	contains: (this: View<T>, id: AnyEntity) => boolean;
 };
 
