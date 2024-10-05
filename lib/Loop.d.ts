@@ -171,4 +171,10 @@ export class Loop<T extends Array<unknown>> {
 	 * @param middleware - (nextFn: () => void) => () => void
 	 */
 	public addMiddleware(middleware: (nextFn: () => void, eventName: string) => () => void): void;
+
+	/**
+	 * Sets the Worlds to be used by the Loop for deferring commands, and the Debugger for profiling.
+	 * @param worlds - An array of Worlds or a map of World names to Worlds.
+	 */
+	public setWorlds(worlds: Array<World> | { [index: string]: World }): void;
 }
