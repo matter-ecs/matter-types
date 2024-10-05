@@ -168,6 +168,8 @@ export class World {
 	public size(): number;
 
 	public optimizeQueries(): void;
+	
+	public commitCommands(): void;
 }
 
 type Query<T extends ComponentBundle> = IterableFunction<LuaTuple<[Entity<T>, ...T]>>;
