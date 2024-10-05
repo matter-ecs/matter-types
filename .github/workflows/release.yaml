@@ -1,41 +1,41 @@
 name: Release
 
 on:
-  push:
-    tags: ["v*"]
+    push:
+        tags: ["v*"]
 
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Project
-        uses: actions/checkout@v3
+    build:
+        name: Build
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Project
+              uses: actions/checkout@v3
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: Matter Types ${{ github.ref }}
-          body: |
-            Matter Types ${{ github.ref }} is now available!
+            - name: Create Release
+              uses: softprops/action-gh-release@v1
+              with:
+                  name: Matter Types ${{ github.ref }}
+                  body: |
+                      Matter Types ${{ github.ref }} is now available!
 
-  publish:
-    name: Publish
-    needs: [release]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Project
-        uses: actions/checkout@v3
+    publish:
+        name: Publish
+        needs: [release]
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Project
+              uses: actions/checkout@v3
 
-      - name: Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
+            - name: Install Node
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 20
 
-      - name: Install Dependencies
-        run: npm ci
+            - name: Install Dependencies
+              run: npm ci
 
-      - name: Publish
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+            - name: Publish
+              run: npm publish
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
